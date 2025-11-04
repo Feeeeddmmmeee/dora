@@ -1,17 +1,32 @@
 #!/usr/bin/env bash
 
+SELECTED=0
+CURRENT=(
+	"$(pwd)/temp2"
+)
+
 escape()
 {
 	case "$1" in
-		clear) printf '\e[2J';;
-		save_term) printf '\e[?1049h';;
-		restore_term) printf '\e[?1049l';;
+		clear) printf "\e[2J";;
+		save_term) printf "\e[?1049h";;
+		restore_term) printf "\e[?1049l";;
+		save_cursor) printf "\e7";;
+		restore_cursor) printf "\e8";;
+		move_cursor_up) printf "\e[${2:-1}A";;
+		move_cursor_down) printf "\e[${2:-1}B";;
+		set_cursor) printf "\e[${2:-0};${3:-0}H";; # row, col
+		hide_cursor) printf "\e[?25l";;
+		show_cursor) printf "\e[?25h";;
+		reset) printf "\e[0m";;
 	esac
 }
 
 cleanup()
 {
 	escape restore_term
+	escape show_cursor
+	escape reset
 }
 
 get_term_size()
@@ -19,18 +34,76 @@ get_term_size()
 	read -r LINES COLUMNS < <(stty size)
 }
 
+render_bottom()
+{
+	escape set_cursor $(($LINES)) 0
+	local selected=${CURRENT[SELECTED]}
+	printf "%s" "$(stat -c "%A %G " $selected)"
+	printf "%s" "$(format_bytes "$(stat -c "%s" $selected)") "
+	printf "%s" "$(date -d "$(stat -c "%z" $selected)" +'%Y-%m-%d %H:%M')"
+}
+
+render_top()
+{
+	escape set_cursor
+	local selected=${CURRENT[SELECTED]}
+	printf "$(whoami)@$(uname -n) "
+	printf $selected
+}
+
+format_bytes()
+{
+	local bytes=$1
+	local units=("B" "KiB" "MiB" "GiB" "TiB")
+	local i=0
+
+	while (( bytes >= 1024 && i < ${#units[@]} - 1 )); do
+		bytes=$(( bytes / 1024 ))
+		((i++))
+	done
+
+	echo "${bytes}${units[$i]}"
+}
+
+render_init()
+{
+	escape clear
+	render_top
+	render_bottom
+}
+
+resize()
+{
+	get_term_size
+	render_init
+}
+
 main()
 {
 	trap cleanup exit
-	trap 'get_term_size' WINCH
-	get_term_size
 
 	escape save_term
+	escape hide_cursor
 	escape clear
 
-	# Placeholder event loop
+	trap 'resize' SIGWINCH
+	resize
+
 	while true; do
-		true
+		# Handling Input
+		local input=""
+		read -rs -n 1 -t 0 input 2>/dev/null
+		# Read 2 chars if first char is an escape charcter (to handle arrow keys)
+		if [[ $input == $'\u1b' ]]; then
+			read -rs -n 2 -t 0 input 2>/dev/null
+		fi
+
+		case "$input" in
+			'[A' | k) true;;
+			'[B' | j) true;;
+			'') true;;
+			q) exit 0;;
+		esac
 	done
 }
 
