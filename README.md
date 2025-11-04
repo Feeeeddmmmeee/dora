@@ -7,3 +7,5 @@ Dora is a simple terminal file explorer written in bash.
 ## :hammer: TODO
 - [ ] minimal terminal size
 - [ ] named pipes for keyboard input
+- [ ] file list for current dir
+- [ ] go to selected/parent dir
