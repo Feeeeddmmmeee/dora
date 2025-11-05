@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
+PIPE=
 SELECTED=0
 CURRENT=(
-	"$(pwd)/temp2"
+	"$(pwd)"
 )
 
 escape()
@@ -13,9 +14,9 @@ escape()
 		restore_term) printf "\e[?1049l";;
 		save_cursor) printf "\e7";;
 		restore_cursor) printf "\e8";;
-		move_cursor_up) printf "\e[${2:-1}A";;
-		move_cursor_down) printf "\e[${2:-1}B";;
-		set_cursor) printf "\e[${2:-0};${3:-0}H";; # row, col
+		move_cursor_up) printf "\e[%sA" "${2:-1}";;
+		move_cursor_down) printf "\e[%sB" "${2:-1}";;
+		set_cursor) printf "\e[%s;%sH" "${2:-0}" "${3:-0}";; # row, col
 		hide_cursor) printf "\e[?25l";;
 		show_cursor) printf "\e[?25h";;
 		reset) printf "\e[0m";;
@@ -27,6 +28,8 @@ cleanup()
 	escape restore_term
 	escape show_cursor
 	escape reset
+	rm $PIPE
+	kill %%
 }
 
 get_term_size()
@@ -36,19 +39,19 @@ get_term_size()
 
 render_bottom()
 {
-	escape set_cursor $(($LINES)) 0
+	escape set_cursor $LINES 0
 	local selected=${CURRENT[SELECTED]}
-	printf "%s" "$(stat -c "%A %G " $selected)"
-	printf "%s" "$(format_bytes "$(stat -c "%s" $selected)") "
-	printf "%s" "$(date -d "$(stat -c "%z" $selected)" +'%Y-%m-%d %H:%M')"
+	printf "%s" "$(stat -c "%A %G " "$selected")"
+	printf "%s" "$(format_bytes "$(stat -c "%s" "$selected")") "
+	printf "%s" "$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M')"
 }
 
 render_top()
 {
 	escape set_cursor
 	local selected=${CURRENT[SELECTED]}
-	printf "$(whoami)@$(uname -n) "
-	printf $selected
+	printf "%s" "$(whoami)@$(uname -n) "
+	printf "%s" "$selected"
 }
 
 format_bytes()
@@ -65,17 +68,36 @@ format_bytes()
 	echo "${bytes}${units[$i]}"
 }
 
-render_init()
+redraw()
 {
 	escape clear
 	render_top
 	render_bottom
 }
 
-resize()
+handle_keyboard_input()
 {
-	get_term_size
-	render_init
+	while true; do
+		# Handling Input
+		local input=""
+		read -rsn1  input 2>/dev/null || return
+		# Read 2 chars if first char is an escape charcter (to handle arrow keys)
+		if [[ $input == $'\u1b' ]]; then
+			read -rsn2 input 2>/dev/null || return
+		fi
+
+		local output=''
+		case "$input" in
+			'[A' | k) output='cursor_up';;
+			'[B' | j) output='cursor_down';;
+			'') output='enter';;
+			q) output='quit';;
+		esac
+
+		if [[ -n $output ]]; then
+			echo $output >&$fd
+		fi
+	done
 }
 
 main()
@@ -86,23 +108,27 @@ main()
 	escape hide_cursor
 	escape clear
 
-	trap 'resize' SIGWINCH
-	resize
+	# Populates the COLUMNS and LINES vars
+	shopt -s checkwinsize
+	# Ensures the vars referenced above are set ¯\_(ツ)_/¯
+	(:)
 
+	trap redraw SIGWINCH
+	redraw
+
+	PIPE=/tmp/dora_keyboard_input_$$
+	mkfifo $PIPE
+	exec {fd}<>$PIPE
+
+	exec {fd2}</dev/tty
+	handle_keyboard_input <&$fd2 &
+
+	# Handle events
 	while true; do
-		# Handling Input
-		local input=""
-		read -rs -n 1 -t 0 input 2>/dev/null
-		# Read 2 chars if first char is an escape charcter (to handle arrow keys)
-		if [[ $input == $'\u1b' ]]; then
-			read -rs -n 2 -t 0 input 2>/dev/null
-		fi
+		read -r -t 0.05 input <&$fd
 
 		case "$input" in
-			'[A' | k) true;;
-			'[B' | j) true;;
-			'') true;;
-			q) exit 0;;
+			quit) exit
 		esac
 	done
 }
