@@ -8,4 +8,4 @@ Dora is a simple terminal file explorer written in bash.
 - [x] named pipe for keyboard input
 - [ ] minimal terminal size
 - [ ] file list for current dir
-- [ ] go to selected/parent dir
+- [x] go to selected/parent dir
