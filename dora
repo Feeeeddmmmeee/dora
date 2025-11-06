@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
 PIPE=
-SELECTED=0
-CURRENT=(
-	"$(pwd)"
-)
+SELECTED=1
+CURRENT_DIR="$(pwd)"
+CURRENT_DIR_CONTENT=()
 
 escape()
 {
@@ -39,14 +38,36 @@ get_term_size()
 
 render_bottom()
 {
-	escape set_cursor $LINES 0
-	local selected=${CURRENT[SELECTED]}
-	printf "%s" "$(stat -c "%A %G " "$selected")"
-	printf "%s" "$(format_bytes "$(stat -c "%s" "$selected")") "
-	printf "%s" "$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M')"
+	escape set_cursor $(($LINES)) 0
+	local selected="$CURRENT_DIR/${CURRENT_DIR_CONTENT[SELECTED]}"
+	printf "%s" "$(stat -c "%A %G " $selected)"
+	printf "%s" "$(format_bytes "$(stat -c "%s" $selected)") "
+	printf "%s" "$(date -d "$(stat -c "%z" $selected)" +'%Y-%m-%d %H:%M')"
 }
 
-render_top()
+get_current_dir_content() 
+{
+	CURRENT_DIR_CONTENT=($(ls -a $CURRENT_DIR))
+}
+
+render_file_list()
+{
+	local iter=1
+	for element in ${CURRENT_DIR_CONTENT[@]}; do
+		escape set_cursor $(($iter)) 0
+		if [[ "$iter" = "$SELECTED" ]]; then
+			printf "\e[7m"
+		fi
+		printf "$element\e[27m"
+		((iter+=1))
+	done
+}
+
+file_list_up()
+{
+}
+
+file_list_down()
 {
 	escape set_cursor
 	local selected=${CURRENT[SELECTED]}
@@ -71,7 +92,8 @@ format_bytes()
 redraw()
 {
 	escape clear
-	render_top
+	get_current_dir_content
+	render_file_list
 	render_bottom
 }
 
