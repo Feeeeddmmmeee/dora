@@ -72,7 +72,7 @@ render_file_list_entry()
 			escape invert_color
 		fi
 		local element=${CURRENT_DIR_CONTENT[$id]}
-		printf "%s" "$element"
+		printf "%-$(($COLUMNS/2))s" "$element"
 		escape reset_color
 	fi
 }
@@ -103,6 +103,7 @@ file_list_move_up()
 	fi
 	render_file_list_entry $SELECTED
 	render_file_list_entry $(($SELECTED+1))
+	render_bottom
 }
 
 file_list_move_down()
@@ -113,16 +114,19 @@ file_list_move_down()
 	fi
 	render_file_list_entry $SELECTED
 	render_file_list_entry $(($SELECTED-1))
+	render_bottom
 }
 
 file_list_open()
 {
-	cd "$CURRENT_DIR/${CURRENT_DIR_CONTENT[$SELECTED]}" &>/dev/null
-	CURRENT_DIR="$(pwd)"
-	clear_file_list
-	get_current_dir_content
-	render_entire_file_list
-	render_top_bar
+	if [[ -d "${CURRENT_DIR_CONTENT[$SELECTED]}" ]]; then
+		cd "$CURRENT_DIR/${CURRENT_DIR_CONTENT[$SELECTED]}" &>/dev/null
+		CURRENT_DIR="$(pwd)"
+		clear_file_list
+		get_current_dir_content
+		render_entire_file_list
+		render_top_bar
+	fi
 }
 
 format_bytes()
