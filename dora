@@ -37,7 +37,27 @@ escape()
 		reset) printf "\e[0m";;
 		erase_line_to_cursor) printf "\e[1K";;
 		invert_color) printf "\e[7m";;
-		reset_color) printf "\e[27m";;
+		reinvert_color) printf "\e[27m";;
+		black_color) printf "\e[30m";;
+		red_color) printf "\e[31m";;
+		green_color) printf "\e[32m";;
+		yellow_color) printf "\e[33m";;
+		blue_color) printf "\e[34m";;
+		magenta_color) printf "\e[35m";;
+		cyan_color) printf "\e[36m";;
+		white_color) printf "\e[37m";;
+		default_color) printf "\e[39m";;
+		black_bg_color) printf "\e[40m";;
+		red_bg_color) printf "\e[41m";;
+		green_bg_color) printf "\e[42m";;
+		yellow_bg_color) printf "\e[43m";;
+		blue_bg_color) printf "\e[44m";;
+		magenta_bg_color) printf "\e[45m";;
+		cyan_bg_color) printf "\e[46m";;
+		white_bg_color) printf "\e[47m";;
+		default_bg_color) printf "\e[49m";;
+		dim) printf "\e[2m";;
+		undim) printf "\e[22m";;
 	esac
 }
 
@@ -119,16 +139,28 @@ render_file_list_entry()
 	is_file_visible "$id"
 	local visible=$?
 	if [[ "$visible" = "1" ]]; then
-		escape set_cursor $pos $((COLS/2))
-		escape erase_line_to_cursor
 		escape set_cursor $pos
 		if (( id == SELECTED )); then
 			escape invert_color
 		fi
 		local element=${CURRENT_DIR_CONTENT[$id]}
-		local global_element="$CURRENT_DIR/$element"
+		local global_element="$CURRENT_DIR$element"
+		if [[	-d "$global_element" ]]; then
+			escape blue_color
+		elif [[	-L "$global_element" ]]; then
+			escape cyan_color
+		elif [[	-f "$global_element" ]]; then
+			escape default_color
+		elif [[	-b "$global_element" ]]; then
+			escape yellow_color
+		elif [[	-c "$global_element" ]]; then
+			escape magenta_color
+		else
+			escape dim
+			escape white_color
+		fi
 		printf "%-$(($COLS/2))s" "$element"
-		escape reset_color
+		escape reset
 	fi
 }
 
@@ -190,6 +222,7 @@ file_list_open()
 			CURRENT_DIR="/"
 		fi
 		SELECTED=0
+		FILE_LIST_OFFSET=0
 		clear_file_list
 		get_current_dir_content
 		render_entire_file_list
