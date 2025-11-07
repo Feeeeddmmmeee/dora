@@ -193,11 +193,6 @@ file_list_open()
 	fi
 }
 
-file_list_exit_dir()
-{
-	file_list_open ..
-}
-
 format_bytes()
 {
 	local bytes=$1
@@ -286,7 +281,7 @@ main()
 			cursor_up) file_list_move_up;;
 			cursor_down) file_list_move_down;;
 			enter_dir) file_list_open;;
-			exit_dir) file_list_exit_dir;;
+			exit_dir) file_list_open ..;;
 			enter) file_list_open;;
 			quit) exit;;
 		esac
