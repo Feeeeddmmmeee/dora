@@ -2,6 +2,8 @@
 
 PIPE=
 SELECTED=0
+ROWS=
+COLS=
 CURRENT=(
 	"$(pwd)"
 )
@@ -30,16 +32,18 @@ cleanup()
 	escape reset
 	rm $PIPE
 	kill %%
+	echo "$ROWS $COLS"
 }
 
 get_term_size()
 {
-	read -r LINES COLUMNS < <(stty size)
+	ROWS=$(tput lines)
+	COLS=$(tput cols)
 }
 
 render_bottom()
 {
-	escape set_cursor $LINES 0
+	escape set_cursor "$ROWS" 0
 	local selected=${CURRENT[SELECTED]}
 	printf "%s" "$(stat -c "%A %G " "$selected")"
 	printf "%s" "$(format_bytes "$(stat -c "%s" "$selected")") "
@@ -70,6 +74,8 @@ format_bytes()
 
 redraw()
 {
+	get_term_size
+
 	escape clear
 	render_top
 	render_bottom
@@ -108,11 +114,6 @@ main()
 	escape hide_cursor
 	escape clear
 
-	# Populates the COLUMNS and LINES vars
-	shopt -s checkwinsize
-	# Ensures the vars referenced above are set ¯\_(ツ)_/¯
-	(:)
-
 	trap redraw SIGWINCH
 	redraw
 
@@ -125,10 +126,10 @@ main()
 
 	# Handle events
 	while true; do
-		read -r -t 0.05 input <&$fd
+		read -r -t 0.5 input <&$fd
 
 		case "$input" in
-			quit) exit
+			quit) exit;;
 		esac
 	done
 }

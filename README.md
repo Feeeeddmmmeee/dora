@@ -6,4 +6,5 @@ Dora is a simple terminal file explorer written in bash.
 
 ## :hammer: TODO
 - [x] named pipe for keyboard input
+- [x] getting new terminal size each time its resized
 - [ ] minimal terminal size
