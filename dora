@@ -40,6 +40,16 @@ get_term_size()
 	COLS=$(tput cols)
 }
 
+justify_to_term_width()
+{
+	local left=$1
+	local right=$2
+
+	len=$((COLS - ${#left} - ${#right}))
+	spaces=$(printf "%${len}s" "")
+	printf "%s" "$left$spaces$right"
+}
+
 render_bottom()
 {
 	local left right spaces selected
@@ -53,19 +63,14 @@ render_bottom()
 
 	right="$ROWS x $COLS"
 
-	len=$((COLS - ${#left} - ${#right} - 2))
-	spaces=$(printf "%${len}s" "")
-
-
-	printf "%s" "$left $spaces $right"
+	justify_to_term_width "$left" "$right"
 }
 
 render_top()
 {
 	escape set_cursor
 	local selected=${CURRENT[SELECTED]}
-	printf "%s" "$(whoami)@$(uname -n) "
-	printf "%s" "$selected"
+	justify_to_term_width "$(whoami)@$(uname -n) $selected" test
 }
 
 format_bytes()
