@@ -32,7 +32,6 @@ cleanup()
 	escape reset
 	rm $PIPE
 	kill %%
-	echo "$ROWS $COLS"
 }
 
 get_term_size()
