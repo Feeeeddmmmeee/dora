@@ -70,7 +70,7 @@ render_bottom()
 {
 	local left right spaces selected
 
-	escape set_cursor "$ROWS" 0
+	escape set_cursor "$((ROWS - 1))" 0
 	selected=${CURRENT_DIR_CONTENT[SELECTED]}
 
 	left="$(stat -c "%A %G " "$selected")"
@@ -80,6 +80,14 @@ render_bottom()
 	right="$ROWS x $COLS"
 
 	justify_to_term_width "$left" "$right"
+}
+
+
+render_top()
+{
+	escape set_cursor
+	local selected="$CURRENT_DIR/${CURRENT_DIR_CONTENT[SELECTED]}"
+	justify_to_term_width "$(whoami)@$(uname -n) $selected" test
 }
 
 get_current_dir_content() 
@@ -131,13 +139,6 @@ render_entire_file_list()
 		render_file_list_entry $iter
 		((iter+=1))
 	done
-}
-
-render_top()
-{
-	escape set_cursor
-	local selected="$CURRENT_DIR/${CURRENT_DIR_CONTENT[SELECTED]}"
-	justify_to_term_width "$(whoami)@$(uname -n) $selected" test
 }
 
 file_list_move_up()
