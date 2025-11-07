@@ -42,11 +42,22 @@ get_term_size()
 
 render_bottom()
 {
+	local left right spaces selected
+
 	escape set_cursor "$ROWS" 0
-	local selected=${CURRENT[SELECTED]}
-	printf "%s" "$(stat -c "%A %G " "$selected")"
-	printf "%s" "$(format_bytes "$(stat -c "%s" "$selected")") "
-	printf "%s" "$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M')"
+	selected=${CURRENT[SELECTED]}
+
+	left="$(stat -c "%A %G " "$selected")"
+	left="$left$(format_bytes "$(stat -c "%s" "$selected")") "
+	left="$left$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M')"
+
+	right="$ROWS x $COLS"
+
+	len=$((COLS - ${#left} - ${#right} - 2))
+	spaces=$(printf "%${len}s" "")
+
+
+	printf "%s" "$left $spaces $right"
 }
 
 render_top()
