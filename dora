@@ -11,6 +11,9 @@ FILE_LIST_OFFSET=0
 CURRENT_DIR="$(pwd)/"
 CURRENT_DIR_CONTENT=()
 
+# type, mod, name, size
+SORTING="name"
+
 fatal()
 {
 	log_error "$*"
@@ -109,6 +112,12 @@ render_top()
 get_current_dir_content() 
 {
 	CURRENT_DIR_CONTENT=($(ls -A "$CURRENT_DIR"))
+	case "$SORTING" in
+		type) CURRENT_DIR_CONTENT=($(ls -A --group-directories-first));;
+		size) CURRENT_DIR_CONTENT=($(ls -AS "$CURRENT_DIR"));;
+		name) CURRENT_DIR_CONTENT=($(ls -A "$CURRENT_DIR"));;
+		mod) CURRENT_DIR_CONTENT=($(ls -At "$CURRENT_DIR"));;
+	esac
 }
 
 clear_file_list()
@@ -170,6 +179,13 @@ render_entire_file_list()
 		render_file_list_entry $iter
 		((iter+=1))
 	done
+}
+
+set_sorting()
+{
+	SORTING=$1
+	get_current_dir_content
+	render_entire_file_list
 }
 
 file_list_move_up()
