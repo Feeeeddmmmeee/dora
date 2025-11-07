@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# 'tail -f .dora_log' to view live updates in any terminal
+LOG_FILE=.dora_log
+
 PIPE=
 SELECTED=0
 ROWS=
@@ -7,6 +10,16 @@ COLS=
 CURRENT=(
 	"$(pwd)"
 )
+
+debug_log()
+{
+	echo "[$(date +'%Y-%m-%d %H:%M:%S')] [$$]:" "$@" >> $LOG_FILE
+}
+
+clear_log()
+{
+	echo -n > $LOG_FILE
+}
 
 escape()
 {
@@ -91,6 +104,8 @@ redraw()
 {
 	get_term_size
 
+	debug_log cols: "$COLS", rows: "$ROWS"
+
 	escape clear
 	render_top
 	render_bottom
@@ -123,6 +138,7 @@ handle_keyboard_input()
 
 main()
 {
+	clear_log
 	trap cleanup exit
 
 	escape save_term
