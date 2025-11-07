@@ -151,6 +151,9 @@ render_file_list_entry()
 			escape cyan_color
 		elif [[	-f "$global_element" ]]; then
 			escape default_color
+			if [[	-x "$global_element" ]]; then
+				escape green_color
+			fi
 		elif [[	-b "$global_element" ]]; then
 			escape yellow_color
 		elif [[	-c "$global_element" ]]; then
