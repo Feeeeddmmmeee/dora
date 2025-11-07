@@ -263,10 +263,10 @@ main()
 	while true; do
 		read -r -t 0.1 input <&$fd
 
-		OLD_ROWS=$ROWS
-		OLD_COLS=$COLS
+		local old_rows=$ROWS
+		local old_cols=$COLS
 		get_term_size
-		if [[ "$OLD_ROWS" -ne "$ROWS" || "$OLD_COLS" -ne "$COLS" ]]; then
+		if [[ "$old_rows" -ne "$ROWS" || "$old_cols" -ne "$COLS" ]]; then
 			redraw
 		fi
 
