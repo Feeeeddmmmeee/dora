@@ -194,6 +194,7 @@ file_list_open()
 		get_current_dir_content
 		render_entire_file_list
 		render_top
+		render_bottom
 	fi
 }
 
@@ -214,8 +215,6 @@ format_bytes()
 redraw()
 {
 	get_term_size
-
-	debug_log cols: "$COLS", rows: "$ROWS"
 
 	escape clear
 	get_current_dir_content
