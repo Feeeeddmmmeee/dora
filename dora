@@ -8,7 +8,7 @@ SELECTED=0
 ROWS=
 COLS=
 FILE_LIST_OFFSET=0
-CURRENT_DIR="$(pwd)"
+CURRENT_DIR="$(pwd)/"
 CURRENT_DIR_CONTENT=()
 
 debug_log()
@@ -119,6 +119,7 @@ render_file_list_entry()
 			escape invert_color
 		fi
 		local element=${CURRENT_DIR_CONTENT[$id]}
+		local global_element="$CURRENT_DIR$element"
 		printf "%-$(($COLS/2))s" "$element"
 		escape reset_color
 	fi
@@ -180,7 +181,11 @@ file_list_open()
 {
 	if [[ -d "${CURRENT_DIR_CONTENT[$SELECTED]}" ]]; then
 		cd "$CURRENT_DIR/${CURRENT_DIR_CONTENT[$SELECTED]}" &>/dev/null
-		CURRENT_DIR="$(pwd)"
+		CURRENT_DIR="$(pwd)/"
+		if [[ "$CURRENT_DIR" == "//" ]]; then
+			CURRENT_DIR="/"
+		fi
+		SELECTED=0
 		clear_file_list
 		get_current_dir_content
 		render_entire_file_list
@@ -210,6 +215,7 @@ redraw()
 
 	escape clear
 	get_current_dir_content
+	SELECTED=0
 	render_entire_file_list
 	render_top_bar
 	render_bottom
