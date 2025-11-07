@@ -297,6 +297,13 @@ main()
 			-l|--logs)
 				show_logs
 				exit 0 ;;
+			-*)
+				echo "Unknown option: $1"
+				fatal "Unknown option: $1"
+				;;
+			*)
+				shift
+				;;
 		esac
 	done
 
