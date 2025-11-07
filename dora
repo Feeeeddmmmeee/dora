@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 # 'tail -f .dora_log' to view live updates in any terminal
-LOG_FILE=.dora_log
+LOG_FILE="$(pwd)/.dora_log"
 
 PIPE=
 SELECTED=0
 ROWS=
 COLS=
+FILE_LIST_OFFSET=0
 CURRENT_DIR="$(pwd)"
 CURRENT_DIR_CONTENT=()
 
@@ -61,16 +62,16 @@ justify_to_term_width()
 	local right=$2
 
 	len=$((COLS - ${#left} - ${#right}))
-	spaces=$(printf "%${len}s" "")
-	printf "%s" "$left$spaces$right"
-}
+		spaces=$(printf "%${len}s" "")
+		printf "%s" "$left$spaces$right"
+	}
 
 render_bottom()
 {
 	local left right spaces selected
 
 	escape set_cursor "$ROWS" 0
-	selected=${CURRENT[SELECTED]}
+	selected=${CURRENT_DIR_CONTENT[SELECTED]}
 
 	left="$(stat -c "%A %G " "$selected")"
 	left="$left$(format_bytes "$(stat -c "%s" "$selected")") "
@@ -88,24 +89,37 @@ get_current_dir_content()
 
 clear_file_list()
 {
-	for (( i=0; i < ${#CURRENT_DIR_CONTENT[@]}; i++ )); do
-		escape set_cursor $(($i+2)) $(($COLUMNS/2))
+	for (( i=2; i < $(($ROWS-1)); i++ )); do
+		escape set_cursor $i $(($COLS/2))
 		escape erase_line_to_cursor
 	done
+}
+
+is_file_visible()
+{
+	local pos=$(($1-$FILE_LIST_OFFSET+2))
+	if (( $pos	>= 2 && $pos < $(($ROWS-1)) )); then
+		return 1;
+	fi
+	return 0;
 }
 
 render_file_list_entry()
 {
 	local id=$1
-	if (( $id	>= 0 && $id < ${#CURRENT_DIR_CONTENT[@]} )); then
-		escape set_cursor $(($id+2)) $(($COLUMNS/2))
+	local pos=$(($id-$FILE_LIST_OFFSET+2))
+	is_file_visible $id
+	local visible=$?
+	debug_log "$visible"
+	if [[ "$visible" = "1" ]]; then
+		escape set_cursor $pos $(($COLS/2))
 		escape erase_line_to_cursor
-		escape set_cursor $(($id+2))
+		escape set_cursor $pos
 		if (( $id == $SELECTED )); then
 			escape invert_color
 		fi
 		local element=${CURRENT_DIR_CONTENT[$id]}
-		printf "%-$(($COLUMNS/2))s" "$element"
+		printf "%-$(($COLS/2))s" "$element"
 		escape reset_color
 	fi
 }
@@ -126,15 +140,21 @@ render_top_bar()
 	justify_to_term_width "$(whoami)@$(uname -n) $selected" test
 }
 
-
 file_list_move_up()
 {
 	((SELECTED-=1))
 	if (( $SELECTED < 0 )); then
 		SELECTED=0
 	fi
-	render_file_list_entry $SELECTED
-	render_file_list_entry $(($SELECTED+1))
+	is_file_visible $SELECTED
+	local visible=$?
+	if [[ "$visible" ==	"0" ]]; then
+		FILE_LIST_OFFSET=$(( $FILE_LIST_OFFSET - 1	))
+		render_entire_file_list
+	else
+		render_file_list_entry $SELECTED
+		render_file_list_entry $(($SELECTED+1))
+	fi
 	render_bottom
 }
 
@@ -144,8 +164,15 @@ file_list_move_down()
 	if (( $SELECTED >= ${#CURRENT_DIR_CONTENT[@]} )); then
 		SELECTED=$((${#CURRENT_DIR_CONTENT[@]} - 1))
 	fi
-	render_file_list_entry $SELECTED
-	render_file_list_entry $(($SELECTED-1))
+	is_file_visible $SELECTED
+	local visible=$?
+	if [[ "$visible" ==	"0" ]]; then
+		FILE_LIST_OFFSET=$(( $FILE_LIST_OFFSET + 1	))
+		render_entire_file_list
+	else
+		render_file_list_entry $SELECTED
+		render_file_list_entry $(($SELECTED-1))
+	fi
 	render_bottom
 }
 
