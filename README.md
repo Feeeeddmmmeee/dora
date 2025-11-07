@@ -14,3 +14,5 @@ Dora is a simple terminal file explorer written in bash.
 - [x] coloring the filetree
 - [x] sorting
 - [ ] minimal terminal size
+- [ ] command line
+- [ ] command line sorting commands
