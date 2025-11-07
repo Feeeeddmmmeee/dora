@@ -1,9 +1,24 @@
 #!/usr/bin/env bash
 
+# 'tail -f .dora_log' to view live updates in any terminal
+LOG_FILE=.dora_log
+
 PIPE=
 SELECTED=0
+ROWS=
+COLS=
 CURRENT_DIR="$(pwd)"
 CURRENT_DIR_CONTENT=()
+
+debug_log()
+{
+	echo "[$(date +'%Y-%m-%d %H:%M:%S')] [$$]:" "$@" >> $LOG_FILE
+}
+
+clear_log()
+{
+	echo -n > $LOG_FILE
+}
 
 escape()
 {
@@ -36,16 +51,34 @@ cleanup()
 
 get_term_size()
 {
-	read -r LINES COLUMNS < <(stty size)
+	ROWS=$(tput lines)
+	COLS=$(tput cols)
+}
+
+justify_to_term_width()
+{
+	local left=$1
+	local right=$2
+
+	len=$((COLS - ${#left} - ${#right}))
+	spaces=$(printf "%${len}s" "")
+	printf "%s" "$left$spaces$right"
 }
 
 render_bottom()
 {
-	escape set_cursor $(($LINES))
-	local selected="$CURRENT_DIR/${CURRENT_DIR_CONTENT[$SELECTED]}"
-	printf "%s" "$(stat -c "%A %G " $selected)"
-	printf "%s" "$(format_bytes "$(stat -c "%s" $selected)") "
-	printf "%s" "$(date -d "$(stat -c "%z" $selected)" +'%Y-%m-%d %H:%M')"
+	local left right spaces selected
+
+	escape set_cursor "$ROWS" 0
+	selected=${CURRENT[SELECTED]}
+
+	left="$(stat -c "%A %G " "$selected")"
+	left="$left$(format_bytes "$(stat -c "%s" "$selected")") "
+	left="$left$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M')"
+
+	right="$ROWS x $COLS"
+
+	justify_to_term_width "$left" "$right"
 }
 
 get_current_dir_content() 
@@ -89,9 +122,8 @@ render_entire_file_list()
 render_top_bar()
 {
 	escape set_cursor
-	local selected=${CURRENT_DIR}
-	printf "%s" "$(whoami)@$(uname -n) "
-	printf "%s" "$selected"
+	local selected=${CURRENT_DIR_CONTENT[SELECTED]}
+	justify_to_term_width "$(whoami)@$(uname -n) $selected" test
 }
 
 
@@ -145,6 +177,10 @@ format_bytes()
 
 redraw()
 {
+	get_term_size
+
+	debug_log cols: "$COLS", rows: "$ROWS"
+
 	escape clear
 	get_current_dir_content
 	render_entire_file_list
@@ -179,16 +215,12 @@ handle_keyboard_input()
 
 main()
 {
+	clear_log
 	trap cleanup exit
 
 	escape save_term
 	escape hide_cursor
 	escape clear
-
-	# Populates the COLUMNS and LINES vars
-	shopt -s checkwinsize
-	# Ensures the vars referenced above are set ¯\_(ツ)_/¯
-	(:)
 
 	trap redraw SIGWINCH
 	redraw
@@ -202,7 +234,7 @@ main()
 
 	# Handle events
 	while true; do
-		read -r -t 0.05 input <&$fd
+		read -r -t 0.5 input <&$fd
 
 		case "$input" in
 			cursor_up) file_list_move_up;;
