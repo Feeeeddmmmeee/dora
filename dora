@@ -133,10 +133,10 @@ render_entire_file_list()
 	done
 }
 
-render_top_bar()
+render_top()
 {
 	escape set_cursor
-	local selected=${CURRENT_DIR_CONTENT[SELECTED]}
+	local selected="$CURRENT_DIR/${CURRENT_DIR_CONTENT[SELECTED]}"
 	justify_to_term_width "$(whoami)@$(uname -n) $selected" test
 }
 
@@ -156,6 +156,7 @@ file_list_move_up()
 		render_file_list_entry $((SELECTED+1))
 	fi
 	render_bottom
+	render_top
 }
 
 file_list_move_down()
@@ -174,6 +175,7 @@ file_list_move_down()
 		render_file_list_entry $((SELECTED-1))
 	fi
 	render_bottom
+	render_top
 }
 
 file_list_open()
@@ -184,7 +186,7 @@ file_list_open()
 		clear_file_list
 		get_current_dir_content
 		render_entire_file_list
-		render_top_bar
+		render_top
 	fi
 }
 
@@ -211,7 +213,7 @@ redraw()
 	escape clear
 	get_current_dir_content
 	render_entire_file_list
-	render_top_bar
+	render_top
 	render_bottom
 }
 
