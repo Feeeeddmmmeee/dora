@@ -7,9 +7,8 @@ PIPE=
 SELECTED=0
 ROWS=
 COLS=
-CURRENT=(
-	"$(pwd)"
-)
+CURRENT_DIR="$(pwd)"
+CURRENT_DIR_CONTENT=()
 
 debug_log()
 {
@@ -31,10 +30,13 @@ escape()
 		restore_cursor) printf "\e8";;
 		move_cursor_up) printf "\e[%sA" "${2:-1}";;
 		move_cursor_down) printf "\e[%sB" "${2:-1}";;
-		set_cursor) printf "\e[%s;%sH" "${2:-0}" "${3:-0}";; # row, col
+		set_cursor) printf "\e[%s;%sH" "${2:-1}" "${3:-1}";; # row, col
 		hide_cursor) printf "\e[?25l";;
 		show_cursor) printf "\e[?25h";;
 		reset) printf "\e[0m";;
+		erase_line_to_cursor) printf "\e[1K";;
+		invert_color) printf "\e[7m";;
+		reset_color) printf "\e[27m";;
 	esac
 }
 
@@ -79,11 +81,84 @@ render_bottom()
 	justify_to_term_width "$left" "$right"
 }
 
-render_top()
+get_current_dir_content() 
+{
+	CURRENT_DIR_CONTENT=($(ls -a $CURRENT_DIR))
+}
+
+clear_file_list()
+{
+	for (( i=0; i < ${#CURRENT_DIR_CONTENT[@]}; i++ )); do
+		escape set_cursor $(($i+2)) $(($COLUMNS/2))
+		escape erase_line_to_cursor
+	done
+}
+
+render_file_list_entry()
+{
+	local id=$1
+	if (( $id	>= 0 && $id < ${#CURRENT_DIR_CONTENT[@]} )); then
+		escape set_cursor $(($id+2)) $(($COLUMNS/2))
+		escape erase_line_to_cursor
+		escape set_cursor $(($id+2))
+		if (( $id == $SELECTED )); then
+			escape invert_color
+		fi
+		local element=${CURRENT_DIR_CONTENT[$id]}
+		printf "%-$(($COLUMNS/2))s" "$element"
+		escape reset_color
+	fi
+}
+
+render_entire_file_list()
+{
+	local iter=0
+	for element in ${CURRENT_DIR_CONTENT[@]}; do
+		render_file_list_entry $iter
+		((iter+=1))
+	done
+}
+
+render_top_bar()
 {
 	escape set_cursor
-	local selected=${CURRENT[SELECTED]}
+	local selected=${CURRENT_DIR_CONTENT[SELECTED]}
 	justify_to_term_width "$(whoami)@$(uname -n) $selected" test
+}
+
+
+file_list_move_up()
+{
+	((SELECTED-=1))
+	if (( $SELECTED < 0 )); then
+		SELECTED=0
+	fi
+	render_file_list_entry $SELECTED
+	render_file_list_entry $(($SELECTED+1))
+	render_bottom
+}
+
+file_list_move_down()
+{
+	((SELECTED+=1))
+	if (( $SELECTED >= ${#CURRENT_DIR_CONTENT[@]} )); then
+		SELECTED=$((${#CURRENT_DIR_CONTENT[@]} - 1))
+	fi
+	render_file_list_entry $SELECTED
+	render_file_list_entry $(($SELECTED-1))
+	render_bottom
+}
+
+file_list_open()
+{
+	if [[ -d "${CURRENT_DIR_CONTENT[$SELECTED]}" ]]; then
+		cd "$CURRENT_DIR/${CURRENT_DIR_CONTENT[$SELECTED]}" &>/dev/null
+		CURRENT_DIR="$(pwd)"
+		clear_file_list
+		get_current_dir_content
+		render_entire_file_list
+		render_top_bar
+	fi
 }
 
 format_bytes()
@@ -107,7 +182,9 @@ redraw()
 	debug_log cols: "$COLS", rows: "$ROWS"
 
 	escape clear
-	render_top
+	get_current_dir_content
+	render_entire_file_list
+	render_top_bar
 	render_bottom
 }
 
@@ -160,6 +237,9 @@ main()
 		read -r -t 0.5 input <&$fd
 
 		case "$input" in
+			cursor_up) file_list_move_up;;
+			cursor_down) file_list_move_down;;
+			enter) file_list_open;;
 			quit) exit;;
 		esac
 	done
