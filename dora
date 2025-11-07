@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-# 'tail -f .dora_log' to view live updates in any terminal
-LOG_FILE="$(pwd)/.dora_log"
+source include/logging
+source include/help
 
 PIPE=
 SELECTED=0
@@ -11,14 +11,10 @@ FILE_LIST_OFFSET=0
 CURRENT_DIR="$(pwd)/"
 CURRENT_DIR_CONTENT=()
 
-debug_log()
+fatal()
 {
-	echo "[$(date +'%Y-%m-%d %H:%M:%S')] [$$]:" "$@" >> "$LOG_FILE"
-}
-
-clear_log()
-{
-	echo -n > "$LOG_FILE"
+	log_error "$*"
+	exit 1
 }
 
 escape()
@@ -162,7 +158,7 @@ render_file_list_entry()
 			escape dim
 			escape white_color
 		fi
-		printf "%-$(($COLS/2))s" "$element"
+		printf "%-$((COLS/2))s" "$element"
 		escape reset
 	fi
 }
@@ -217,11 +213,11 @@ file_list_move_down()
 file_list_open()
 {
 	local dest="${1:-${CURRENT_DIR_CONTENT[$SELECTED]}}"
-	debug_log "$dest"
+	log_debug "Opening $dest"
 	if [[ -d "$dest" ]]; then
-		cd "$CURRENT_DIR$dest" &>/dev/null || exit
+		cd "$CURRENT_DIR$dest" &>/dev/null || fatal "Failed to open $CURRENT_DIR$dest"
 		CURRENT_DIR="$(pwd)/"
-    if [[ "$CURRENT_DIR" == "//" ]]; then
+		if [[ "$CURRENT_DIR" == "//" ]]; then
 			CURRENT_DIR="/"
 		fi
 		SELECTED=0
@@ -230,6 +226,7 @@ file_list_open()
 		get_current_dir_content
 		render_entire_file_list
 		render_top
+		render_bottom
 	fi
 }
 
@@ -250,8 +247,6 @@ format_bytes()
 redraw()
 {
 	get_term_size
-
-	debug_log cols: "$COLS", rows: "$ROWS"
 
 	escape clear
 	get_current_dir_content
@@ -290,7 +285,22 @@ handle_keyboard_input()
 
 main()
 {
-	clear_log
+	# Init logging
+	mkdir -p "$LOG_DIR" || fatal "Failed to init logging directory"
+
+	# Parse command line options
+	while [[ $# -gt 0 ]]; do
+		case $1 in
+			-h|--help) 
+				show_help
+				exit 0 ;;
+			-l|--logs)
+				show_logs
+				exit 0 ;;
+		esac
+	done
+
+	# Prepare terminal for rendering
 	trap cleanup exit
 
 	escape save_term
@@ -300,6 +310,7 @@ main()
 	trap redraw SIGWINCH
 	redraw
 
+	# Setup named pipes for communication
 	PIPE=/tmp/dora_keyboard_input_$$
 	mkfifo $PIPE
 	exec {fd}<>$PIPE
