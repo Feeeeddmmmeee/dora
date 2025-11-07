@@ -14,6 +14,9 @@ CURRENT_DIR_CONTENT=()
 # type, mod, name, size
 SORTING="name"
 
+# normal, command
+MODE="normal"
+
 fatal()
 {
 	log_error "$*"
@@ -272,6 +275,25 @@ redraw()
 	render_bottom
 }
 
+handle_command()
+{
+	local tokens=()
+	IFS=" " read -a tokens <<< "$1"
+	case "${tokens[0]}" in
+		*) log_info "${#tokens[@]}"
+	esac
+}
+
+start_command()
+{
+	MODE="command"
+}
+
+reset_mode()
+{
+	MODE="normal"
+}
+
 handle_keyboard_input()
 {
 	while true; do
@@ -290,6 +312,8 @@ handle_keyboard_input()
 			'[C' | l) output='enter_dir';;
 			'[D' | h | -) output='exit_dir';;
 			'') output='enter';;
+			':') output='cmd';;
+			'[27') output='esc';;
 			q) output='quit';;
 		esac
 
@@ -358,6 +382,8 @@ main()
 			enter_dir) file_list_open;;
 			exit_dir) file_list_open ..;;
 			enter) file_list_open;;
+			cmd) start_command;;
+			esc) reset_mode;;
 			quit) exit;;
 		esac
 	done
