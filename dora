@@ -8,7 +8,7 @@ SELECTED=0
 ROWS=
 COLS=
 FILE_LIST_OFFSET=0
-CURRENT_DIR="$(pwd)"
+CURRENT_DIR="$(pwd)/"
 CURRENT_DIR_CONTENT=()
 
 debug_log()
@@ -86,7 +86,7 @@ render_bottom()
 render_top()
 {
 	escape set_cursor
-	local selected="$CURRENT_DIR/${CURRENT_DIR_CONTENT[SELECTED]}"
+	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[SELECTED]}"
 	justify_to_term_width "$(whoami)@$(uname -n) $selected" test
 }
 
@@ -118,7 +118,6 @@ render_file_list_entry()
 	local pos=$((id-FILE_LIST_OFFSET+2))
 	is_file_visible "$id"
 	local visible=$?
-	debug_log "$visible"
 	if [[ "$visible" = "1" ]]; then
 		escape set_cursor $pos $((COLS/2))
 		escape erase_line_to_cursor
@@ -127,7 +126,8 @@ render_file_list_entry()
 			escape invert_color
 		fi
 		local element=${CURRENT_DIR_CONTENT[$id]}
-		printf "%-$((COLS/2))s" "$element"
+		local global_element="$CURRENT_DIR/$element"
+		printf "%-$(($COLS/2))s" "$element"
 		escape reset_color
 	fi
 }
@@ -184,8 +184,11 @@ file_list_open()
 	local dest="${1:-${CURRENT_DIR_CONTENT[$SELECTED]}}"
 	debug_log "$dest"
 	if [[ -d "$dest" ]]; then
-		cd "$CURRENT_DIR/$dest" &>/dev/null || exit
-		CURRENT_DIR="$(pwd)"
+		cd "$CURRENT_DIR$dest" &>/dev/null || exit
+		CURRENT_DIR="$(pwd)/"
+    if [[ "$CURRENT_DIR" == "//" ]]; then
+			CURRENT_DIR="/"
+		fi
 		SELECTED=0
 		clear_file_list
 		get_current_dir_content
@@ -216,6 +219,7 @@ redraw()
 
 	escape clear
 	get_current_dir_content
+	SELECTED=0
 	render_entire_file_list
 	render_top
 	render_bottom
