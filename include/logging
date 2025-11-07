@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+LOG_DIR="$HOME/.local/state/dora/logs"
+LOG_FILE="$LOG_DIR/log"
+
+LOG_DEBUG=0
+LOG_INFO=1
+LOG_WARN=2
+LOG_ERROR=3
+
+LOG_LEVEL=$LOG_DEBUG
+
+# $1 = level, $LOG_DEBUG, $LOG_INFO, ... / 0, 1, ...
+# ${@:2} = message, "string"
+_log()
+{
+	local level=$1
+	local level_names=(
+		DEBUG
+		INFO
+		WARN
+		ERROR
+	)
+	echo "[$(date +'%Y-%m-%d %H:%M:%S')] [$$] [${level_names[level]}]:" "${@:2}" >> "$LOG_FILE"
+}
+
+log_debug() { [[ $LOG_LEVEL -le $LOG_DEBUG ]] && _log $LOG_DEBUG "$*"; }
+log_info()  { [[ $LOG_LEVEL -le $LOG_INFO  ]] && _log $LOG_INFO  "$*"; }
+log_warn()  { [[ $LOG_LEVEL -le $LOG_WARN  ]] && _log $LOG_WARN  "$*"; }
+log_error() { [[ $LOG_LEVEL -le $LOG_ERROR ]] && _log $LOG_ERROR "$*"; }
+
+show_logs()
+{
+	tail -f "$LOG_FILE"
+}
