@@ -84,7 +84,7 @@ render_bottom()
 
 get_current_dir_content() 
 {
-	CURRENT_DIR_CONTENT=($(ls -a "$CURRENT_DIR"))
+	CURRENT_DIR_CONTENT=($(ls -A "$CURRENT_DIR"))
 }
 
 clear_file_list()
@@ -180,14 +180,22 @@ file_list_move_down()
 
 file_list_open()
 {
-	if [[ -d "${CURRENT_DIR_CONTENT[$SELECTED]}" ]]; then
-		cd "$CURRENT_DIR/${CURRENT_DIR_CONTENT[$SELECTED]}" &>/dev/null || exit
+	local dest="${1:-${CURRENT_DIR_CONTENT[$SELECTED]}}"
+	debug_log "$dest"
+	if [[ -d "$dest" ]]; then
+		cd "$CURRENT_DIR/$dest" &>/dev/null || exit
 		CURRENT_DIR="$(pwd)"
+		SELECTED=0
 		clear_file_list
 		get_current_dir_content
 		render_entire_file_list
 		render_top
 	fi
+}
+
+file_list_exit_dir()
+{
+	file_list_open ..
 }
 
 format_bytes()
@@ -232,6 +240,8 @@ handle_keyboard_input()
 		case "$input" in
 			'[A' | k) output='cursor_up';;
 			'[B' | j) output='cursor_down';;
+			'[C' | l) output='enter_dir';;
+			'[D' | h | -) output='exit_dir';;
 			'') output='enter';;
 			q) output='quit';;
 		esac
@@ -275,6 +285,8 @@ main()
 		case "$input" in
 			cursor_up) file_list_move_up;;
 			cursor_down) file_list_move_down;;
+			enter_dir) file_list_open;;
+			exit_dir) file_list_exit_dir;;
 			enter) file_list_open;;
 			quit) exit;;
 		esac
