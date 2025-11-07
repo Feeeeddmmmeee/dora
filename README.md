@@ -9,3 +9,5 @@ Dora is a simple terminal file explorer written in bash.
 - [x] getting new terminal size each time its resized
 - [ ] minimal terminal size
 - [ ] logging to a file, live logging in a terminal for current session
+- [x] file list for current dir
+- [x] go to selected/parent dir
