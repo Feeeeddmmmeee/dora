@@ -261,7 +261,14 @@ main()
 
 	# Handle events
 	while true; do
-		read -r -t 0.5 input <&$fd
+		read -r -t 0.1 input <&$fd
+
+		OLD_ROWS=$ROWS
+		OLD_COLS=$COLS
+		get_term_size
+		if [[ "$OLD_ROWS" -ne "$ROWS" || "$OLD_COLS" -ne "$COLS" ]]; then
+			redraw
+		fi
 
 		case "$input" in
 			cursor_up) file_list_move_up;;
