@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+SCRIPT_NAME=$(basename "$0")
+
+show_help()
+{
+	cat << EOF
+$SCRIPT_NAME - A simple terminal file manager written in bash
+
+Usage:
+  $SCRIPT_NAME [OPTIONS]
+
+Options:
+  --help           Display this help message
+  --logs           Open a live preview of the program's log file
+EOF
+}
