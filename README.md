@@ -1,5 +1,5 @@
-## About
-Dora is a simple terminal file explorer written in bash.
+## :book: About
+Dora is a simple terminal file explorer written in bash. 
 
 > [!NOTE]
 > The project's developement has just started and most features are yet to be added.
@@ -12,7 +12,15 @@ Dora is a simple terminal file explorer written in bash.
 - [x] go to selected/parent dir
 - [x] help message
 - [x] coloring the filetree
-- [x] sorting
+- [ ] sorting
 - [ ] minimal terminal size
 - [ ] command line
 - [ ] command line sorting commands
+
+## :exclamation: Project requirements
+- [x] Filesystem navigation
+- [ ] Finding files by name, type, size, date
+- [ ] Current directory statistics - file count, combined size, biggest file
+- [ ] Export results to JSON/CSV
+- [x] Colors:3
+- [ ] Logging user actions
