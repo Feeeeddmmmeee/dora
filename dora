@@ -102,8 +102,8 @@ render_bottom()
 render_top()
 {
 	escape set_cursor
-	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[SELECTED]}"
-	justify_to_term_width "$(whoami)@$(uname -n) $selected" test
+	local selected="$(escape blue_color)$CURRENT_DIR$(escape white_color)${CURRENT_DIR_CONTENT[SELECTED]}"
+	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected"
 }
 
 get_current_dir_content() 
@@ -158,7 +158,7 @@ render_file_list_entry()
 			escape dim
 			escape white_color
 		fi
-		printf "%-$((COLS/2))s" "$element"
+		printf "%-$((COLS/2))s" " $element"
 		escape reset
 	fi
 }
