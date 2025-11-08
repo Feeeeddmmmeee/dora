@@ -113,6 +113,16 @@ render_top()
 	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected" "$dims"
 }
 
+render_command() 
+{
+	escape set_cursor $ROWS
+	if [[ "$MODE" = "command" ]]; then
+		printf "%-${COLS}s" ":$CURRENT_COMMAND"
+	else
+		printf "%-${COLS}s" ""
+	fi
+}
+
 clear_file_list()
 {
 	for (( i=2; i < $((ROWS-1)); i++ )); do
@@ -202,5 +212,6 @@ redraw()
 	render_entire_file_list
 	render_top
 	render_bottom
+	render_command
 	update_selected_content
 }

@@ -2,6 +2,7 @@
 
 source include/help
 source include/navigation
+source include/command
 
 # type, mod, name, size
 init_sorting "type"
@@ -10,9 +11,12 @@ SHOW_HIDDEN=
 PIPE=
 
 # normal, command
-MODE="normal"
+MODE="normal" 
 
-CURRENT_COMMAND=""
+reset_mode() {
+	MODE="normal"
+	render_command
+}
 
 fatal()
 {
@@ -34,9 +38,9 @@ handle_keyboard_input()
 	while true; do
 		# Handling Input
 		local input=""
-		read -rsn1  input 2>/dev/null || return
+		IFS= read -rsn1  input 2>/dev/null || return
 		# Read 2 chars if first char is an escape charcter (to handle arrow keys)
-		if [[ $input == $'\u1b' ]]; then
+		if [[ $input == $'\x1b' ]]; then
 			local rest=""
 			while IFS= read -rsn1 -t 0.01 char 2>/dev/null; do
         rest+="$char"
@@ -44,15 +48,18 @@ handle_keyboard_input()
 			if [[ -n "$rest" ]]; then
 				input="$rest"
 			else
-				input="ESC"
+				input="ESCAPE"
 			fi
+		elif [[ $input = $'\x08' || $input = $'\x7f' ]]; then
+			input="BACKSPACE"
+		elif [[ $input = $'\x20' ]]; then
+			input=" "
 		fi
 
 		if [[ -n "$input" ]]; then
 			echo $input >&$fd
 		else
-			# SpaceEnter
-			echo "BLANK" >&$fd
+			echo "RETURN" >&$fd
 		fi
 	done
 }
@@ -126,20 +133,20 @@ main()
 		case "$MODE" in
 			normal)
 				case "$input" in
-					'[A' | k) file_list_move_up;;
-					'[B' | j) file_list_move_down;;
+					'[A' | k) file_list_move_selection -1;;
+					'[B' | j) file_list_move_selection 1;;
 					'[C' | l) file_list_open;;
 					'[D' | h | -) file_list_open ..;;
-					'BLANK') file_list_open;;
-					':') start_command;;
+					'RETURN') file_list_open;;
+					':') enter_command_mode;;
 					q) exit;;
 				esac;;
 			command)
 				case "$input" in
-					'ESC') reset_mode;;
-					*) 
-						CURRENT_COMMAND+="$input"
-						render_command
+					'ESCAPE') reset_mode;;
+					'BACKSPACE') command_remove_character;;
+					'RETURN') execute_command;;
+					*) command_add_character "$input";;
 				esac;;
 		esac
 	done
