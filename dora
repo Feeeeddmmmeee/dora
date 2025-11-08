@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-source include/logging
 source include/help
 source include/navigation
 
@@ -112,8 +111,8 @@ main()
 		fi
 
 		case "$input" in
-			cursor_up) file_list_move_up;;
-			cursor_down) file_list_move_down;;
+			cursor_up) file_list_move_selection -1;;
+			cursor_down) file_list_move_selection 1;;
 			enter_dir) file_list_open;;
 			exit_dir) file_list_open .. ;;
 			enter) file_list_open;;

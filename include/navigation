@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source include/rendering
+
 CURRENT_DIR="$(pwd)/"
 SELECTED=0
 FILE_LIST_OFFSET=0
@@ -8,8 +10,6 @@ SELECTED_CONTENT=
 
 # type, mod, name, size
 SORTING="type"
-
-source include/rendering
 
 set_sorting()
 {
@@ -30,6 +30,25 @@ get_current_dir_content()
 	esac
 }
 
+update_selected_content()
+{
+	local height=$((ROWS - 3))
+	local content=
+	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
+
+	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
+	if [[ -f $selected ]]; then
+		content="$(head -"$height" "$selected" | tr '\0' '\n')"
+	fi
+
+	if [[ -d selected ]]; then
+		true
+	fi
+
+	SELECTED_CONTENT=$content
+	render_selected_content
+}
+
 is_file_visible()
 {
 	local pos=$(($1-FILE_LIST_OFFSET+2))
@@ -39,40 +58,27 @@ is_file_visible()
 	return 0;
 }
 
-file_list_move_up()
+file_list_move_selection()
 {
-	((SELECTED-=1))
-	if (( SELECTED < 0 )); then
-		SELECTED=0
-	fi
-	is_file_visible $SELECTED
-	local visible=$?
-	if [[ "$visible" ==	"0" ]]; then
-		FILE_LIST_OFFSET=$(( FILE_LIST_OFFSET - 1	))
-		render_entire_file_list
-	else
-		render_file_list_entry $SELECTED
-		render_file_list_entry $((SELECTED+1))
-	fi
-	render_bottom
-	render_top
-	update_selected_content
-}
+	local jump_size=${1:-1}
+	local prev="$SELECTED"
+	((SELECTED+=jump_size))
 
-file_list_move_down()
-{
-	((SELECTED+=1))
 	if (( SELECTED >= ${#CURRENT_DIR_CONTENT[@]} )); then
 		SELECTED=$((${#CURRENT_DIR_CONTENT[@]} - 1))
 	fi
+	if (( SELECTED < 0 )); then
+		SELECTED=0
+	fi
+
 	is_file_visible $SELECTED
 	local visible=$?
 	if [[ "$visible" ==	"0" ]]; then
-		FILE_LIST_OFFSET=$(( FILE_LIST_OFFSET + 1	))
+		FILE_LIST_OFFSET=$((FILE_LIST_OFFSET + jump_size))
 		render_entire_file_list
 	else
 		render_file_list_entry $SELECTED
-		render_file_list_entry $((SELECTED-1))
+		render_file_list_entry $prev
 	fi
 	render_bottom
 	render_top
@@ -87,9 +93,11 @@ file_list_open()
 	if [[ -d "$dest" ]]; then
 		cd "$dest" &>/dev/null || fatal "Failed to open $dest"
 		CURRENT_DIR="$(pwd)/"
+
 		if [[ "$CURRENT_DIR" == "//" ]]; then
 			CURRENT_DIR="/"
 		fi
+
 		SELECTED=0
 		FILE_LIST_OFFSET=0
 		clear_file_list
@@ -98,5 +106,8 @@ file_list_open()
 		render_top
 		render_bottom
 		update_selected_content
+	else
+		# TODO: open file with preferred editor
+		true
 	fi
 }

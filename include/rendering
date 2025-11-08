@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source include/logging
+
 ROWS=
 COLS=
 
@@ -180,25 +182,6 @@ render_selected_content()
 		printf "%s" "${line:0:maxlen}"
 		((i++))
 	done <<< "$SELECTED_CONTENT"
-}
-
-update_selected_content()
-{
-	local height=$((ROWS - 3))
-	local content=
-	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
-
-	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
-	if [[ -f $selected ]]; then
-		content="$(head -"$height" "$selected" | tr '\0' '\n')"
-	fi
-
-	if [[ -d selected ]]; then
-		true
-	fi
-
-	SELECTED_CONTENT=$content
-	render_selected_content
 }
 
 redraw()
