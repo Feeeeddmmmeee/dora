@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+source include/rendering
+
+CURRENT_COMMAND=""
+
+enter_command_mode()
+{
+	MODE="command"
+	CURRENT_COMMAND=""
+	render_command
+}
+
+command_add_character()
+{
+	CURRENT_COMMAND+="$1"
+	render_command
+}
+
+command_remove_character()
+{
+	CURRENT_COMMAND="${CURRENT_COMMAND:0:-1}"
+	render_command
+}
+
+execute_command()
+{
+	log_debug "Executing $CURRENT_COMMAND"
+	reset_mode
+}

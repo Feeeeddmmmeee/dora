@@ -2,12 +2,21 @@
 
 source include/help
 source include/navigation
+source include/command
 
 # type, mod, name, size
 init_sorting "type"
 
 SHOW_HIDDEN=
 PIPE=
+
+# normal, command
+MODE="normal" 
+
+reset_mode() {
+	MODE="normal"
+	render_command
+}
 
 fatal()
 {
@@ -29,24 +38,28 @@ handle_keyboard_input()
 	while true; do
 		# Handling Input
 		local input=""
-		read -rsn1  input 2>/dev/null || return
+		IFS= read -rsn1  input 2>/dev/null || return
 		# Read 2 chars if first char is an escape charcter (to handle arrow keys)
-		if [[ $input == $'\u1b' ]]; then
-			read -rsn2 input 2>/dev/null || return
+		if [[ $input == $'\x1b' ]]; then
+			local rest=""
+			while IFS= read -rsn1 -t 0.01 char 2>/dev/null; do
+        rest+="$char"
+      done
+			if [[ -n "$rest" ]]; then
+				input="$rest"
+			else
+				input="ESCAPE"
+			fi
+		elif [[ $input = $'\x08' || $input = $'\x7f' ]]; then
+			input="BACKSPACE"
+		elif [[ $input = $'\x20' ]]; then
+			input=" "
 		fi
 
-		local output=''
-		case "$input" in
-			'[A' | k) output='cursor_up';;
-			'[B' | j) output='cursor_down';;
-			'[C' | l) output='enter_dir';;
-			'[D' | h | -) output='exit_dir';;
-			'') output='enter';;
-			q) output='quit';;
-		esac
-
-		if [[ -n $output ]]; then
-			echo $output >&$fd
+		if [[ -n "$input" ]]; then
+			echo $input >&$fd
+		else
+			echo "RETURN" >&$fd
 		fi
 	done
 }
@@ -83,8 +96,6 @@ main()
 	escape save_term
 	escape hide_cursor
 	escape clear
-
-	trap redraw SIGWINCH
 	redraw
 
 	# Try to cd into directory if provided with one
@@ -113,13 +124,30 @@ main()
 			redraw
 		fi
 
-		case "$input" in
-			cursor_up) file_list_move_selection -1;;
-			cursor_down) file_list_move_selection 1;;
-			enter_dir) file_list_open;;
-			exit_dir) file_list_open .. ;;
-			enter) file_list_open;;
-			quit) exit;;
+		if [[ -z "$input" ]]; then
+			continue
+		fi
+
+		log_debug "$input"
+
+		case "$MODE" in
+			normal)
+				case "$input" in
+					'[A' | k) file_list_move_selection -1;;
+					'[B' | j) file_list_move_selection 1;;
+					'[C' | l) file_list_open;;
+					'[D' | h | -) file_list_open ..;;
+					'RETURN') file_list_open;;
+					':') enter_command_mode;;
+					q) exit;;
+				esac;;
+			command)
+				case "$input" in
+					'ESCAPE') reset_mode;;
+					'BACKSPACE') command_remove_character;;
+					'RETURN') execute_command;;
+					*) command_add_character "$input";;
+				esac;;
 		esac
 	done
 }
