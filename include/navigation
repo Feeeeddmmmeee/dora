@@ -51,7 +51,8 @@ init_sorting()
 
 get_current_dir_content() 
 {
-	CURRENT_DIR_CONTENT=($(ls -A "${LS_FLAGS[@]}" "$CURRENT_DIR"))
+	# Load the output of ls into the CURRENT_DIR_CONTENT array
+	mapfile -t CURRENT_DIR_CONTENT < <(ls -A "${LS_FLAGS[@]}" "$CURRENT_DIR")
 }
 
 update_selected_content()
