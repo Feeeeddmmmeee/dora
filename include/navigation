@@ -7,9 +7,7 @@ SELECTED=0
 FILE_LIST_OFFSET=0
 CURRENT_DIR_CONTENT=()
 SELECTED_CONTENT=
-
-# type, mod, name, size
-SORTING="type"
+LS_FLAGS=()
 
 # Rerenders components which depend on the currently active file
 # (except the dir content as its handled separately)
@@ -35,18 +33,19 @@ directory_change()
 set_sorting()
 {
 	SORTING=$1
+	LS_FLAGS=()
+	case "$SORTING" in
+		type) LS_FLAGS=(--group-directories-first);;
+		size) LS_FLAGS=(-S);;
+		name) LS_FLAGS=();;
+		mod) LS_FLAGS=(-t);;
+	esac
 	directory_change
 }
 
 get_current_dir_content() 
 {
-	CURRENT_DIR_CONTENT=($(ls -A "$CURRENT_DIR"))
-	case "$SORTING" in
-		type) CURRENT_DIR_CONTENT=($(ls -A --group-directories-first "$CURRENT_DIR"));;
-		size) CURRENT_DIR_CONTENT=($(ls -AS "$CURRENT_DIR"));;
-		name) CURRENT_DIR_CONTENT=($(ls -A "$CURRENT_DIR"));;
-		mod) CURRENT_DIR_CONTENT=($(ls -At "$CURRENT_DIR"));;
-	esac
+	CURRENT_DIR_CONTENT=($(ls -A "${LS_FLAGS[@]}" "$CURRENT_DIR"))
 }
 
 update_selected_content()
@@ -56,12 +55,12 @@ update_selected_content()
 	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
 
 	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
-	if [[ -f $selected ]]; then
+	if [ -f "$selected" ]; then
 		content="$(head -"$height" "$selected" | tr '\0' '\n')"
 	fi
 
-	if [[ -d selected ]]; then
-		true
+	if [ -d "$selected" ]; then
+		content="$(ls -A "$selected")"
 	fi
 
 	SELECTED_CONTENT=$content
