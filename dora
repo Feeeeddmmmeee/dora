@@ -4,7 +4,7 @@ source include/help
 source include/navigation
 
 # type, mod, name, size
-set_sorting "type"
+init_sorting "type"
 
 SHOW_HIDDEN=
 PIPE=

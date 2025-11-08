@@ -32,6 +32,12 @@ directory_change()
 
 set_sorting()
 {
+	init_sorting "$@"
+	directory_change
+}
+
+init_sorting()
+{
 	SORTING=$1
 	LS_FLAGS=()
 	case "$SORTING" in
@@ -40,7 +46,6 @@ set_sorting()
 		name) LS_FLAGS=();;
 		mod) LS_FLAGS=(-t);;
 	esac
-	directory_change
 }
 
 get_current_dir_content() 
