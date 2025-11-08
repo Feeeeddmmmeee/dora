@@ -115,11 +115,16 @@ render_top()
 
 render_command() 
 {
-	escape set_cursor $ROWS
 	if [[ "$MODE" = "command" ]]; then
-		printf "%-${COLS}s" ":$CURRENT_COMMAND"
+		escape set_cursor $ROWS
+		clean="${CURRENT_COMMAND//$'\n'/}"
+		clean="${clean:0:$(($COLS-1))}"
+		printf ":%-$(($COLS-1))s" "$clean"
 	else
-		printf "%-${COLS}s" ""
+		escape set_cursor $ROWS
+		clean="${CURRENT_MESSAGE//$'\n'/}"
+		clean="${clean:0:$(($COLS-1))}"
+		printf "%-$(($COLS-1))s" "$clean"
 	fi
 }
 
