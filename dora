@@ -17,6 +17,8 @@ SORTING="name"
 # normal, command
 MODE="normal"
 
+CURRENT_COMMAND=""
+
 fatal()
 {
 	log_error "$*"
@@ -273,9 +275,10 @@ redraw()
 	render_entire_file_list
 	render_top
 	render_bottom
+	render_command
 }
 
-handle_command()
+execute_command()
 {
 	local tokens=()
 	IFS=" " read -a tokens <<< "$1"
@@ -284,13 +287,23 @@ handle_command()
 	esac
 }
 
+render_command()
+{
+	escape set_cursor $ROWS
+	printf ":%s" "$CURRENT_COMMAND"
+}
+
 start_command()
 {
+	log_debug "COMMAND"
 	MODE="command"
+	CURRENT_COMMAND=""
+	render_command
 }
 
 reset_mode()
 {
+	log_debug "NORMAL"
 	MODE="normal"
 }
 
@@ -302,23 +315,22 @@ handle_keyboard_input()
 		read -rsn1  input 2>/dev/null || return
 		# Read 2 chars if first char is an escape charcter (to handle arrow keys)
 		if [[ $input == $'\u1b' ]]; then
-			read -rsn2 input 2>/dev/null || return
+			local rest=""
+			while IFS= read -rsn1 -t 0.01 char 2>/dev/null; do
+        rest+="$char"
+      done
+			if [[ -n "$rest" ]]; then
+				input="$rest"
+			else
+				input="ESC"
+			fi
 		fi
 
-		local output=''
-		case "$input" in
-			'[A' | k) output='cursor_up';;
-			'[B' | j) output='cursor_down';;
-			'[C' | l) output='enter_dir';;
-			'[D' | h | -) output='exit_dir';;
-			'') output='enter';;
-			':') output='cmd';;
-			'[27') output='esc';;
-			q) output='quit';;
-		esac
-
-		if [[ -n $output ]]; then
-			echo $output >&$fd
+		if [[ -n "$input" ]]; then
+			echo $input >&$fd
+		else
+			# SpaceEnter
+			echo "BLANK" >&$fd
 		fi
 	done
 }
@@ -353,8 +365,6 @@ main()
 	escape save_term
 	escape hide_cursor
 	escape clear
-
-	trap redraw SIGWINCH
 	redraw
 
 	# Setup named pipes for communication
@@ -376,15 +386,30 @@ main()
 			redraw
 		fi
 
-		case "$input" in
-			cursor_up) file_list_move_up;;
-			cursor_down) file_list_move_down;;
-			enter_dir) file_list_open;;
-			exit_dir) file_list_open ..;;
-			enter) file_list_open;;
-			cmd) start_command;;
-			esc) reset_mode;;
-			quit) exit;;
+		if [[ -z "$input" ]]; then
+			continue
+		fi
+
+		log_debug "$input"
+
+		case "$MODE" in
+			normal)
+				case "$input" in
+					'[A' | k) file_list_move_up;;
+					'[B' | j) file_list_move_down;;
+					'[C' | l) file_list_open;;
+					'[D' | h | -) file_list_open ..;;
+					'BLANK') file_list_open;;
+					':') start_command;;
+					q) exit;;
+				esac;;
+			command)
+				case "$input" in
+					'ESC') reset_mode;;
+					*) 
+						CURRENT_COMMAND+="$input"
+						render_command
+				esac;;
 		esac
 	done
 }
