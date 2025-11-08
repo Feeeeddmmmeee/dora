@@ -28,6 +28,10 @@ command_add_character()
 
 command_remove_character()
 {
+	if [ -z $CURRENT_COMMAND ]; then
+		reset_mode
+		return
+	fi
 	CURRENT_COMMAND="${CURRENT_COMMAND:0:-1}"
 	render_command
 }
