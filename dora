@@ -3,6 +3,7 @@
 source include/logging
 source include/help
 
+SHOW_HIDDEN=
 PIPE=
 SELECTED=0
 ROWS=
@@ -10,9 +11,10 @@ COLS=
 FILE_LIST_OFFSET=0
 CURRENT_DIR="$(pwd)/"
 CURRENT_DIR_CONTENT=()
+SELECTED_CONTENT=
 
 # type, mod, name, size
-SORTING="name"
+SORTING="type"
 
 fatal()
 {
@@ -35,6 +37,7 @@ escape()
 		show_cursor) printf "\e[?25h";;
 		reset) printf "\e[0m";;
 		erase_line_to_cursor) printf "\e[1K";;
+		erase_cursor_to_end) printf "\e[0K";;
 		invert_color) printf "\e[7m";;
 		reinvert_color) printf "\e[27m";;
 		black_color) printf "\e[30m";;
@@ -66,7 +69,7 @@ cleanup()
 	escape show_cursor
 	escape reset
 	rm $PIPE
-	kill %%
+	kill %% 2>/dev/null
 }
 
 get_term_size()
@@ -80,34 +83,46 @@ justify_to_term_width()
 	local left=$1
 	local right=$2
 
-	len=$((COLS - ${#left} - ${#right}))
-		spaces=$(printf "%${len}s" "")
-		printf "%s" "$left$spaces$right"
-	}
+	local left_no_escape right_no_escape
+	left_no_escape=$(sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' <<< "$left")
+	right_no_escape=$(sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' <<< "$right")
+
+	local len=$((COLS - ${#left_no_escape} - ${#right_no_escape}))
+	spaces=$(printf "%${len}s" "")
+	printf "%s" "$left$spaces$right"
+}
 
 render_bottom()
 {
-	local left right spaces selected
+	local file_info spaces selected dir_info index
 
 	escape set_cursor "$((ROWS - 1))" 0
-	selected=${CURRENT_DIR_CONTENT[SELECTED]}
+	if (( ${#CURRENT_DIR_CONTENT[@]} )); then
+		selected=${CURRENT_DIR_CONTENT[SELECTED]}
 
-	left="$(stat -c "%A %G " "$selected")"
-	left="$left$(format_bytes "$(stat -c "%s" "$selected")") "
-	left="$left$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M')"
+		file_info="$(stat -c "%A %G " "$selected")"
+		file_info="$file_info$(format_bytes "$(stat -c "%s" "$selected")") "
+		file_info="$file_info$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M') $(escape reset)"
+		index="($((SELECTED + 1))/${#CURRENT_DIR_CONTENT[@]})"
+	else
+		file_info="$(escape reset)"
+		index="(0/0)"
+	fi
 
-	right="$ROWS x $COLS"
+	dir_info="$(escape blue_color)$(escape invert_color)$index"
 
-	justify_to_term_width "$left" "$right"
+	justify_to_term_width "$dir_info" "$file_info"
 }
 
 
 render_top()
 {
 	escape set_cursor
-	local selected
+	local selected dims
 	selected="$(escape blue_color)$CURRENT_DIR$(escape white_color)${CURRENT_DIR_CONTENT[SELECTED]}"
-	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected"
+	dims="$ROWS x $COLS"
+
+	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected" "$dims"
 }
 
 get_current_dir_content() 
@@ -168,7 +183,7 @@ render_file_list_entry()
 			escape dim
 			escape white_color
 		fi
-		printf "%-$((COLS/2))s" " $element"
+		printf "%-$((COLS/2 - 1))s" " $element"
 		escape reset
 	fi
 }
@@ -187,6 +202,7 @@ set_sorting()
 	SORTING=$1
 	get_current_dir_content
 	render_entire_file_list
+	update_selected_content
 }
 
 file_list_move_up()
@@ -206,6 +222,7 @@ file_list_move_up()
 	fi
 	render_bottom
 	render_top
+	update_selected_content
 }
 
 file_list_move_down()
@@ -225,12 +242,14 @@ file_list_move_down()
 	fi
 	render_bottom
 	render_top
+	update_selected_content
 }
 
 file_list_open()
 {
 	local dest="${1:-$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}}"
 	log_debug "Opening $dest"
+
 	if [[ -d "$dest" ]]; then
 		cd "$dest" &>/dev/null || fatal "Failed to open $dest"
 		CURRENT_DIR="$(pwd)/"
@@ -244,7 +263,46 @@ file_list_open()
 		render_entire_file_list
 		render_top
 		render_bottom
+		update_selected_content
 	fi
+}
+
+render_selected_content()
+{
+	local mid=$(((COLS/2)+1))
+	local i=2
+	local maxlen=$((COLS - mid - 1))
+
+	for j in $(seq 2 $((ROWS-2))); do
+		escape set_cursor "$j" "$mid"
+		escape erase_cursor_to_end
+	done
+
+	while IFS= read -r line; do
+		escape set_cursor $i "$mid"
+		line="${line//$'\t'/    }"
+		printf "%s" "${line:0:maxlen}"
+		((i++))
+	done <<< "$SELECTED_CONTENT"
+}
+
+update_selected_content()
+{
+	local height=$((ROWS - 3))
+	local content=
+	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
+
+	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
+	if [[ -f $selected ]]; then
+		content="$(head -"$height" "$selected" | tr '\0' '\n')"
+	fi
+
+	if [[ -d selected ]]; then
+		true
+	fi
+
+	SELECTED_CONTENT=$content
+	render_selected_content
 }
 
 format_bytes()
@@ -271,6 +329,7 @@ redraw()
 	render_entire_file_list
 	render_top
 	render_bottom
+	update_selected_content
 }
 
 handle_keyboard_input()
@@ -336,7 +395,7 @@ main()
 	trap redraw SIGWINCH
 	redraw
 
-	# Cd into directory if provided with one
+	# Try to cd into directory if provided with one
 	set -- "${ARGS[@]}"
 	if [[ -n $1 ]]; then
 		file_list_open "$1"
@@ -357,6 +416,7 @@ main()
 		local old_rows=$ROWS
 		local old_cols=$COLS
 		get_term_size
+
 		if [[ "$old_rows" -ne "$ROWS" || "$old_cols" -ne "$COLS" ]]; then
 			redraw
 		fi
@@ -366,7 +426,7 @@ main()
 			cursor_down) file_list_move_down;;
 			enter_dir) file_list_open;;
 			exit_dir) file_list_open .. ;;
-			enter) file_list_open "";;
+			enter) file_list_open;;
 			quit) exit;;
 		esac
 	done
