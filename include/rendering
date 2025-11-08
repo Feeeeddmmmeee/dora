@@ -190,6 +190,7 @@ redraw()
 {
 	get_term_size
 
+	escape clear
 	get_current_dir_content
 	SELECTED=0
 	FILE_LIST_OFFSET=0
