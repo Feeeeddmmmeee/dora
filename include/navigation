@@ -39,6 +39,7 @@ set_sorting()
 init_sorting()
 {
 	SORTING=$1
+	log_debug "Sorting mode set to: \"$SORTING\"";
 	LS_FLAGS=()
 	case "$SORTING" in
 		type) LS_FLAGS=(--group-directories-first);;
@@ -134,10 +135,13 @@ file_list_move_selection()
 file_list_open()
 {
 	local dest="${1:-$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}}"
-	log_debug "Opening $dest"
 
 	if [[ -d "$dest" ]]; then
-		cd "$dest" &>/dev/null || fatal "Failed to open $dest"
+		cd "$dest" &>/dev/null && log_debug "Going to $dest" || \
+			{ 
+				log_debug "Going to $dest failed" 
+				set_command_line_message "`escape red_color`Failed to open $dest`escape default_color`"
+			}
 		CURRENT_DIR="$(pwd)/"
 
 		if [[ "$CURRENT_DIR" == "//" ]]; then

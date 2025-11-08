@@ -8,11 +8,13 @@ CURRENT_MESSAGE=""
 set_command_line_message()
 {
 	CURRENT_MESSAGE="$1"
+	log_debug "Setting message: \"$CURRENT_MESSAGE\""
 	render_command
 }
 
 enter_command_mode()
 {
+	log_debug "Entering COMMAND mode"
 	MODE="command"
 	CURRENT_COMMAND=""
 	render_command
@@ -43,10 +45,9 @@ command_sort()
 
 execute_command()
 {
-	log_debug "Executing \"$CURRENT_COMMAND\""
 	local tokens=()
 	read -a tokens <<< "$CURRENT_COMMAND" 2>/dev/null
-	log_debug "Command \"${tokens[0]}\""
+	log_debug "Executing command sort: \"${tokens[0]}\", full prompt: \"$CURRENT_COMMAND\""
 	case "${tokens[0]}" in
 		sort) command_sort "${tokens[1]}";;
 		*) set_command_line_message "`escape red_color`Command ${tokens[0]} not found`escape default_color`"
