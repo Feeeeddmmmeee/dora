@@ -1,0 +1,154 @@
+#!/usr/bin/env bash
+
+source include/rendering
+
+CURRENT_DIR="$(pwd)/"
+SELECTED=0
+FILE_LIST_OFFSET=0
+CURRENT_DIR_CONTENT=()
+SELECTED_CONTENT=
+LS_FLAGS=()
+
+# Rerenders components which depend on the currently active file
+# (except the dir content as its handled separately)
+file_change()
+{
+	render_top
+	render_bottom
+	update_selected_content
+}
+
+# Rerenders everything without fetching new terminal dimensions 
+# and updating variables
+directory_change()
+{
+	clear_file_list
+	get_current_dir_content
+	render_entire_file_list
+	render_top
+	render_bottom
+	update_selected_content
+}
+
+set_sorting()
+{
+	init_sorting "$@"
+	directory_change
+}
+
+init_sorting()
+{
+	SORTING=$1
+	LS_FLAGS=()
+	case "$SORTING" in
+		type) LS_FLAGS=(--group-directories-first);;
+		size) LS_FLAGS=(-S);;
+		name) LS_FLAGS=();;
+		mod) LS_FLAGS=(-t);;
+	esac
+}
+
+get_current_dir_content() 
+{
+	CURRENT_DIR_CONTENT=($(ls -A "${LS_FLAGS[@]}" "$CURRENT_DIR"))
+}
+
+update_selected_content()
+{
+	local height=$((ROWS - 3))
+	local content=
+	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
+
+	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
+	if [ -f "$selected" ]; then
+		content="$(head -"$height" "$selected" | tr '\0' '\n')"
+	elif [ -d "$selected" ]; then
+		local files
+		files="$(ls -A "${LS_FLAGS[@]}" "$selected")"
+		content=$(parse_file_list "$(head -"$height" <<< "$files")" "$selected")
+	fi
+
+	SELECTED_CONTENT=$content
+	render_selected_content
+}
+
+parse_file_list()
+{
+	local files=$1
+	local dir=$2
+	while IFS= read -r line; do
+		get_filetype_color "$dir/$line"
+		printf "%b\n" "$line"
+		escape reset
+		((i++))
+	done <<< "$files"
+}
+
+is_file_visible()
+{
+	# +2 = +1 to account for the top bar, +1 because lines are 1 indexed
+	local pos=$(($1-FILE_LIST_OFFSET+2))
+	if (( pos > 1 && pos < $((ROWS - 2)) )); then
+		return 1;
+	fi
+	return 0;
+}
+
+file_list_move_selection()
+{
+	local dir_size=${#CURRENT_DIR_CONTENT[@]}
+	
+	if [[ "$dir_size" = "0" ]]; then
+		return 1
+	fi
+
+	local jump_size=${1:-1}
+	local prev="$SELECTED"
+	((SELECTED+=jump_size))
+
+	if (( SELECTED >= dir_size )); then
+		SELECTED=$((dir_size - 1))
+		jump_size=$((SELECTED - prev))
+	fi
+	if (( SELECTED < 0 )); then
+		SELECTED=0
+		jump_size=$((SELECTED - prev))
+	fi
+
+	# Don't rerender components if the selected file didn't change
+	if [[ "$jump_size" = "0" ]]; then
+		return 0
+	fi
+
+	if is_file_visible $SELECTED; then
+		FILE_LIST_OFFSET=$((FILE_LIST_OFFSET + jump_size))
+		render_entire_file_list
+	else
+		render_file_list_entry $SELECTED
+		render_file_list_entry $prev
+	fi
+
+	file_change
+}
+
+file_list_open()
+{
+	local dest="${1:-$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}}"
+	log_debug "Opening $dest"
+
+	if [[ -d "$dest" ]]; then
+		cd "$dest" &>/dev/null || fatal "Failed to open $dest"
+		CURRENT_DIR="$(pwd)/"
+
+		if [[ "$CURRENT_DIR" == "//" ]]; then
+			CURRENT_DIR="/"
+		fi
+
+		SELECTED=0
+		FILE_LIST_OFFSET=0
+		directory_change
+	else
+		# TODO: open file with preferred editor
+		true
+	fi
+}
