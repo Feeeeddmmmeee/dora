@@ -51,7 +51,8 @@ init_sorting()
 
 get_current_dir_content() 
 {
-	CURRENT_DIR_CONTENT=($(ls -A "${LS_FLAGS[@]}" "$CURRENT_DIR"))
+	# Load the output of ls into the CURRENT_DIR_CONTENT array
+	mapfile -t CURRENT_DIR_CONTENT < <(ls -A "${LS_FLAGS[@]}" "$CURRENT_DIR")
 }
 
 update_selected_content()
@@ -60,13 +61,16 @@ update_selected_content()
 	local content=
 	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
 
-	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
-	if [ -f "$selected" ]; then
-		content="$(head -"$height" "$selected" | tr '\0' '\n')"
-	elif [ -d "$selected" ]; then
+	if [ -d "$selected" ]; then
 		local files
 		files="$(ls -A "${LS_FLAGS[@]}" "$selected")"
 		content=$(parse_file_list "$(head -"$height" <<< "$files")" "$selected")
+	# Don't try to render binary files
+	elif file --mime-encoding "$selected" | grep -q binary; then
+		content="Can't preview binary file!"
+	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
+	elif [ -f "$selected" ]; then
+		content="$(head -"$height" "$selected" | tr '\0' '\n')"
 	fi
 
 	SELECTED_CONTENT=$content
