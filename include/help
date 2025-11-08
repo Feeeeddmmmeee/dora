@@ -8,10 +8,15 @@ show_help()
 $SCRIPT_NAME - A simple terminal file manager written in bash
 
 Usage:
-  $SCRIPT_NAME [OPTIONS]
+  $SCRIPT_NAME [OPTIONS] [PATH]
 
 Options:
   --help           Display this help message
   --logs           Open a live preview of the program's log file
+
+Arguments:
+  PATH             Start the file manager in the specified directory
+                   Example: $SCRIPT_NAME ./some/directory
 EOF
 }
+
