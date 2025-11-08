@@ -121,6 +121,27 @@ clear_file_list()
 	done
 }
 
+get_filetype_color()
+{
+	local file=$1
+	if [[	-d "$file" ]]; then
+		escape blue_color
+	elif [[	-L "$file" ]]; then
+		escape cyan_color
+	elif [[	-f "$file" ]]; then
+		escape default_color
+		if [[ -x "$file" ]]; then
+			escape green_color
+		fi
+	elif [[	-b "$file" ]]; then
+		escape yellow_color
+	elif [[	-c "$file" ]]; then
+		escape magenta_color
+	else
+		escape white_color
+	fi
+}
+
 render_file_list_entry()
 {
 	local id=$1
@@ -134,23 +155,7 @@ render_file_list_entry()
 		fi
 		local element=${CURRENT_DIR_CONTENT[$id]}
 		local global_element="$CURRENT_DIR$element"
-		if [[	-d "$global_element" ]]; then
-			escape blue_color
-		elif [[	-L "$global_element" ]]; then
-			escape cyan_color
-		elif [[	-f "$global_element" ]]; then
-			escape default_color
-			if [[	-x "$global_element" ]]; then
-				escape green_color
-			fi
-		elif [[	-b "$global_element" ]]; then
-			escape yellow_color
-		elif [[	-c "$global_element" ]]; then
-			escape magenta_color
-		else
-			escape dim
-			escape white_color
-		fi
+		get_filetype_color "$global_element"
 		printf "%-$((COLS/2 - 1))s" " $element"
 		escape reset
 	fi

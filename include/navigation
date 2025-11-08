@@ -62,14 +62,26 @@ update_selected_content()
 	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
 	if [ -f "$selected" ]; then
 		content="$(head -"$height" "$selected" | tr '\0' '\n')"
-	fi
-
-	if [ -d "$selected" ]; then
-		content="$(ls -A "$selected")"
+	elif [ -d "$selected" ]; then
+		local files
+		files="$(ls -A "${LS_FLAGS[@]}" "$selected")"
+		content=$(parse_file_list "$(head -"$height" <<< "$files")" "$selected")
 	fi
 
 	SELECTED_CONTENT=$content
 	render_selected_content
+}
+
+parse_file_list()
+{
+	local files=$1
+	local dir=$2
+	while IFS= read -r line; do
+		get_filetype_color "$dir/$line"
+		printf "%b\n" "$line"
+		escape reset
+		((i++))
+	done <<< "$files"
 }
 
 is_file_visible()
