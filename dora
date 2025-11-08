@@ -29,6 +29,8 @@ cleanup()
 	escape restore_term
 	escape show_cursor
 	escape reset
+	tput rmcup
+	tput smam
 	rm $PIPE
 	kill %% 2>/dev/null
 }
@@ -52,12 +54,12 @@ handle_keyboard_input()
 			fi
 		elif [[ $input = $'\x08' || $input = $'\x7f' ]]; then
 			input="BACKSPACE"
-		elif [[ $input = $'\x20' ]]; then
+		elif [[ $input = " " ]]; then
 			input=" "
 		fi
 
 		if [[ -n "$input" ]]; then
-			echo $input >&$fd
+			echo "$input" >&$fd
 		else
 			echo "RETURN" >&$fd
 		fi
@@ -90,6 +92,8 @@ main()
 		esac
 	done
 
+	tput smcup
+	tput rmam
 	# Prepare terminal for rendering
 	trap cleanup exit
 
@@ -114,7 +118,7 @@ main()
 
 	# Handle events
 	while true; do
-		read -r -t 0.1 input <&$fd
+		IFS="" read -r -t 0.1 input <&$fd
 
 		local old_rows=$ROWS
 		local old_cols=$COLS
@@ -123,12 +127,10 @@ main()
 		if [[ "$old_rows" -ne "$ROWS" || "$old_cols" -ne "$COLS" ]]; then
 			redraw
 		fi
-
+		
 		if [[ -z "$input" ]]; then
 			continue
 		fi
-
-		log_debug "$input"
 
 		case "$MODE" in
 			normal)

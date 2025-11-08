@@ -3,6 +3,13 @@
 source include/rendering
 
 CURRENT_COMMAND=""
+CURRENT_MESSAGE=""
+
+set_command_line_message()
+{
+	CURRENT_MESSAGE="$1"
+	render_command
+}
 
 enter_command_mode()
 {
@@ -23,8 +30,26 @@ command_remove_character()
 	render_command
 }
 
+command_sort() 
+{
+	local sorting=$1
+	case "$sorting" in
+		type | size | name | mod) 
+			set_command_line_message "Sorting by $sorting"
+			set_sorting "$sorting";;
+		*) set_command_line_message "`escape red_color`$sorting is not a supported sorting scheme`escape default_color`";;
+	esac
+}
+
 execute_command()
 {
-	log_debug "Executing $CURRENT_COMMAND"
+	log_debug "Executing \"$CURRENT_COMMAND\""
+	local tokens=()
+	read -a tokens <<< "$CURRENT_COMMAND" 2>/dev/null
+	log_debug "Command \"${tokens[0]}\""
+	case "${tokens[0]}" in
+		sort) command_sort "${tokens[1]}";;
+		*) set_command_line_message "`escape red_color`Command ${tokens[0]} not found`escape default_color`"
+	esac
 	reset_mode
 }
