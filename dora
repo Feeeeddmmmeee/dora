@@ -105,7 +105,8 @@ render_bottom()
 render_top()
 {
 	escape set_cursor
-	local selected="$(escape blue_color)$CURRENT_DIR$(escape white_color)${CURRENT_DIR_CONTENT[SELECTED]}"
+	local selected
+	selected="$(escape blue_color)$CURRENT_DIR$(escape white_color)${CURRENT_DIR_CONTENT[SELECTED]}"
 	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected"
 }
 
@@ -228,10 +229,10 @@ file_list_move_down()
 
 file_list_open()
 {
-	local dest="${1:-${CURRENT_DIR_CONTENT[$SELECTED]}}"
+	local dest="${1:-$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}}"
 	log_debug "Opening $dest"
 	if [[ -d "$dest" ]]; then
-		cd "$CURRENT_DIR$dest" &>/dev/null || fatal "Failed to open $CURRENT_DIR$dest"
+		cd "$dest" &>/dev/null || fatal "Failed to open $dest"
 		CURRENT_DIR="$(pwd)/"
 		if [[ "$CURRENT_DIR" == "//" ]]; then
 			CURRENT_DIR="/"
@@ -305,6 +306,7 @@ main()
 	mkdir -p "$LOG_DIR" || fatal "Failed to init logging directory"
 
 	# Parse command line options
+	ARGS=()
 	while [[ $# -gt 0 ]]; do
 		case $1 in
 			-h|--help) 
@@ -318,6 +320,7 @@ main()
 				fatal "Unknown option: $1"
 				;;
 			*)
+				ARGS+=("$1")
 				shift
 				;;
 		esac
@@ -332,6 +335,12 @@ main()
 
 	trap redraw SIGWINCH
 	redraw
+
+	# Cd into directory if provided with one
+	set -- "${ARGS[@]}"
+	if [[ -n $1 ]]; then
+		file_list_open "$1"
+	fi
 
 	# Setup named pipes for communication
 	PIPE=/tmp/dora_keyboard_input_$$
@@ -356,8 +365,8 @@ main()
 			cursor_up) file_list_move_up;;
 			cursor_down) file_list_move_down;;
 			enter_dir) file_list_open;;
-			exit_dir) file_list_open ..;;
-			enter) file_list_open;;
+			exit_dir) file_list_open .. ;;
+			enter) file_list_open "";;
 			quit) exit;;
 		esac
 	done
