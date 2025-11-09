@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+source include/rendering
+
+SEARCH_QUERY=
+ORIGINAL_FILES=
+
+enter_search_mode()
+{
+	log_debug "Entering SEARCH mode"
+	MODE="search"
+	CURRENT_INPUT="$SEARCH_QUERY"
+	if [ -z "$SEARCH_QUERY" ]; then
+		sync_search_files
+	fi
+	render_input
+}
+
+sync_search_files()
+{
+	ORIGINAL_FILES=("${CURRENT_DIR_CONTENT[@]}")
+}
+
+update_search()
+{
+	CURRENT_DIR_CONTENT=()
+	for item in "${ORIGINAL_FILES[@]}"; do
+		[[ $item == *"$SEARCH_QUERY"* ]] && CURRENT_DIR_CONTENT+=("$item")
+	done
+
+	search_change
+}
+
+# Ran when user exists the directory he started the search in
+# and if they pressed escape instead of enter
+reset_search()
+{
+	ORIGINAL_FILES=()
+	SEARCH_QUERY=""
+}
