@@ -18,8 +18,8 @@ Dora is a simple terminal file explorer written in bash.
 - [x] command line sorting commands
 - [ ] find system
 - [ ] find commands
-- [ ] grep system
-- [ ] grep commands
+- [x] grep system
+- [x] grep commands
 
 ## :exclamation: Project requirements
 - [x] Filesystem navigation
