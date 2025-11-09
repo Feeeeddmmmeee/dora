@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source include/help
+source include/grep
 source include/navigation
 source include/command
 
@@ -12,8 +13,27 @@ PIPE=
 
 # normal, command
 MODE="normal" 
+# preview, grep
+RIGHT_PANEL_MODE="preview"
+
+enter_grep_mode()
+{
+	log_debug "Entering GREP right mode"
+	RIGHT_PANEL_MODE="grep"
+	update_grep_result "$1"
+	render_right_panel
+}
+
+enter_preview_mode()
+{
+	log_debug "Entering PREVIEW right mode"
+	RIGHT_PANEL_MODE="preview"
+	update_selected_content
+	render_right_panel
+}
 
 reset_mode() {
+	log_debug "Entering NORMAL mode"
 	MODE="normal"
 	render_command
 }
@@ -112,6 +132,7 @@ main()
 	PIPE=/tmp/dora_keyboard_input_$$
 	mkfifo $PIPE
 	exec {fd}<>$PIPE
+	exec 2>$LOG_FILE
 
 	exec {fd2}</dev/tty
 	handle_keyboard_input <&$fd2 &

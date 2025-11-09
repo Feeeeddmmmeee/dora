@@ -47,6 +47,16 @@ command_sort()
 	esac
 }
 
+command_grep()
+{
+	enter_grep_mode	"$1"
+}
+
+command_preview()
+{
+	enter_preview_mode
+}
+
 execute_command()
 {
 	local tokens=()
@@ -54,6 +64,8 @@ execute_command()
 	log_debug "Executing command sort: \"${tokens[0]}\", full prompt: \"$CURRENT_COMMAND\""
 	case "${tokens[0]}" in
 		sort) command_sort "${tokens[1]}";;
+		grep) command_grep "${tokens[@]:1}";;
+		preview) command_preview;;
 		*) set_command_line_message "`escape red_color`Command ${tokens[0]} not found`escape default_color`"
 	esac
 	reset_mode
