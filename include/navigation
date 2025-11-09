@@ -2,7 +2,7 @@
 
 source include/rendering
 
-MARKED_FILE=
+MARKED=
 MARKED_DIR=
 
 CURRENT_DIR="$(pwd)/"
