@@ -13,6 +13,12 @@ enter_command_mode()
 command_sort() 
 {
 	local sorting=$1
+
+	if [[ -z "$sorting" ]]; then
+		set_input_message "$(escape red_color)You must supply a sorting scheme$(escape default_color)"
+		return 1
+	fi
+
 	case "$sorting" in
 		type | size | name | mod) 
 			set_input_message "Sorting by $sorting"
@@ -50,7 +56,8 @@ command_hidden()
 
 mark_file()
 {
-	MARKED="${CURRENT_DIR_CONTENT[$SELECTED]}"
+	# Tries to mark $1 but if empty use the currently selected file
+	MARKED=${1:-"${CURRENT_DIR_CONTENT[$SELECTED]}"}
 	MARKED_DIR="$CURRENT_DIR"
 	log_debug "Marked $MARKED_DIR$MARKED"
 	set_input_message "Marked $MARKED"
@@ -107,10 +114,11 @@ execute_command()
 		sort) command_sort "${tokens[1]}";;
 		grep) command_grep "${tokens[@]:1}";;
 		preview) command_preview;;
-		mark) mark_file;;
+		mark) mark_file "${tokens[1]}";;
 		cp|copy) edit_marked copy "$CURRENT_DIR";;
 		mv|move) edit_marked move "$CURRENT_DIR";;
 		rm|remove|delete) edit_marked delete;;
+		create|touch) true;;
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) exit 0;;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
