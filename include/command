@@ -44,6 +44,20 @@ command_sort()
 command_hidden()
 {
 	local arg=$1
+
+	# If ran with no arguments toggle
+	if [ -z "$arg" ]; then
+		case "$SHOW_HIDDEN" in
+			'1') 
+				set_input_message "Disabled showing .hidden files"
+				set_hidden 0;;
+			'0')
+				set_input_message "Enabled showing .hidden files"
+				set_hidden 1;;
+		esac
+		return 0
+	fi
+
 	case "$arg" in
 		true|1|yes)
 			set_input_message "Enabled showing .hidden files"
