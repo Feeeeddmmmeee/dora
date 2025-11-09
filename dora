@@ -80,7 +80,8 @@ remove_character()
 			GREP_PATTERN="$CURRENT_INPUT"
 			update_grep_result;;
 		command)
-			CURRENT_COMMAND="$CURRENT_INPUT";;
+			CURRENT_COMMAND="$CURRENT_INPUT"
+			update_command_draft;;
 	esac
 }
 
