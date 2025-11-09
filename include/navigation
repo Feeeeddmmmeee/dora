@@ -18,7 +18,8 @@ file_change()
 {
 	render_top
 	render_bottom
-	update_selected_content
+	update_right_panel_data
+	render_right_panel
 }
 
 # Rerenders everything without fetching new terminal dimensions 
@@ -30,7 +31,8 @@ directory_change()
 	render_entire_file_list
 	render_top
 	render_bottom
-	update_selected_content
+	update_right_panel_data
+	render_right_panel
 }
 
 # Works like directory_change() but doesn't update the current
@@ -114,7 +116,14 @@ update_selected_content()
 	fi
 
 	SELECTED_CONTENT=$content
-	render_selected_content
+}
+
+update_right_panel_data()
+{
+	case "$RIGHT_PANEL_MODE" in
+		preview) update_selected_content;;
+		grep) update_grep_result;;
+	esac
 }
 
 parse_file_list()

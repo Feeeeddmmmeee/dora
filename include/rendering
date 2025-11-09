@@ -221,6 +221,34 @@ render_selected_content()
 	done <<< "$SELECTED_CONTENT"
 }
 
+render_grep_result()
+{
+	local mid=$(((COLS/2)+1))
+	local i=2
+	local maxlen=$((COLS - mid - 1))
+
+	for j in $(seq 2 $((ROWS-2))); do
+		escape set_cursor "$j" "$mid"
+		escape erase_cursor_to_end
+	done
+	
+	while IFS= read -r line; do
+		escape set_cursor $i "$mid"
+		line="${line//$'\t'/    }"
+		printf "%s" "${line:0:maxlen}"
+		((i++))
+		[[ "$i" -ge $((ROWS-2)) ]] && break
+	done <<< "$GREP_RESULT"
+}
+
+render_right_panel()
+{
+	case "$RIGHT_PANEL_MODE" in
+		preview) render_selected_content;;
+		grep) render_grep_result;;
+	esac
+}
+
 # Fetches the current terminal size, rerenders everything
 # and resets navigation variables
 redraw()
@@ -236,4 +264,5 @@ redraw()
 	render_bottom
 	render_command
 	update_selected_content
+	render_right_panel
 }
