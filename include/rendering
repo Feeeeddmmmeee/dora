@@ -112,7 +112,7 @@ render_top()
 	selected="$(escape blue_color)$CURRENT_DIR$(escape white_color)${CURRENT_DIR_CONTENT[SELECTED]}"
 	dims="$ROWS x $COLS"
 
-	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected" "$SEARCH_QUERY" #"$dims"
+	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected" "$(get_filetype_color "$MARKED")$MARKED$(escape reset)" #"$SEARCH_QUERY" #"$dims"
 }
 
 render_input() 
@@ -187,9 +187,8 @@ render_file_list_entry()
 {
 	local id=$1
 	local pos=$((id-FILE_LIST_OFFSET+2))
-	is_file_visible "$id"
-	local visible=$?
-	if [[ "$visible" = "1" ]]; then
+
+	if ! is_file_visible "$id"; then
 		escape set_cursor $pos
 		if (( id == SELECTED )); then
 			escape invert_color

@@ -69,6 +69,7 @@ remove_character()
 		reset_mode
 		return
 	fi
+
 	CURRENT_INPUT="${CURRENT_INPUT:0:-1}"
 	render_input
 
@@ -120,8 +121,8 @@ handle_keyboard_input()
 		if [[ $input == $'\x1b' ]]; then
 			local rest=""
 			while IFS= read -rsn1 -t 0.01 char 2>/dev/null; do
-        rest+="$char"
-      done
+				rest+="$char"
+			done
 			if [[ -n "$rest" ]]; then
 				input="$rest"
 			else
@@ -131,6 +132,10 @@ handle_keyboard_input()
 			input="BACKSPACE"
 		elif [[ $input = " " ]]; then
 			input=" "
+		elif [[ $input = $'\x15' ]]; then
+			input="CTRL-U"
+		elif [[ $input = $'\x04' ]]; then
+			input="CTRL-D"
 		fi
 
 		if [[ -n "$input" ]]; then
@@ -220,7 +225,7 @@ main()
 		if [[ "$old_rows" -ne "$ROWS" || "$old_cols" -ne "$COLS" ]]; then
 			redraw
 		fi
-		
+
 		if [[ -z "$input" ]]; then
 			continue
 		fi
@@ -230,11 +235,18 @@ main()
 				case "$input" in
 					'[A' | k) file_list_move_selection -1;;
 					'[B' | j) file_list_move_selection 1;;
+					'CTRL-U') file_list_move_selection $(((ROWS - 3)/-2));;
+					'CTRL-D') file_list_move_selection $(((ROWS - 3)/2));;
 					'[C' | l) file_list_open;;
 					'[D' | h | -) file_list_open ..;;
 					'RETURN') file_list_open;;
 					':') enter_command_mode;;
 					'/') enter_search_mode;;
+					' ') mark_file;;
+					'c') edit_marked copy "$CURRENT_DIR";;
+					'm') edit_marked move "$CURRENT_DIR";;
+					'd') edit_marked delete;;
+					't') start_command "create ";;
 					'?') enter_grep_mode;;
 					q) exit;;
 				esac;;

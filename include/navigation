@@ -2,6 +2,9 @@
 
 source include/rendering
 
+MARKED_FILE=
+MARKED_DIR=
+
 CURRENT_DIR="$(pwd)/"
 SELECTED=0
 FILE_LIST_OFFSET=0
@@ -140,9 +143,11 @@ parse_file_list()
 {
 	local files=$1
 	local dir=$2
+	local i=0
+	local suffix=
 	while IFS= read -r line; do
 		get_filetype_color "$dir/$line"
-		printf "%b\n" "$line"
+		printf "%b\n" "$line$suffix"
 		escape reset
 		((i++))
 	done <<< "$files"
@@ -185,7 +190,14 @@ file_list_move_selection()
 	fi
 
 	if is_file_visible $SELECTED; then
-		FILE_LIST_OFFSET=$((FILE_LIST_OFFSET + jump_size))
+		local offa offb
+
+		# Make sure offset isn't out of bounds
+		offb=$((dir_size - ROWS + 4))
+		offa=$((FILE_LIST_OFFSET + jump_size))
+		FILE_LIST_OFFSET=$((offa>offb ? offb : offa))
+		FILE_LIST_OFFSET=$((FILE_LIST_OFFSET>0 ?FILE_LIST_OFFSET : 0))
+
 		render_entire_file_list
 	else
 		render_file_list_entry $SELECTED
