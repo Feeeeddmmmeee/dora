@@ -2,10 +2,24 @@
 
 source include/rendering
 
+CURRENT_COMMAND=""
+CURRENT_MESSAGE=""
+COMMAND_HISTORY=()
+COMMAND_HISTORY_POSITION="1"
+COMMAND_DRAFT=""
+
+set_command_line_message()
+{
+	CURRENT_MESSAGE="$1"
+	log_debug "Setting message: \"$CURRENT_MESSAGE\""
+	render_command
+}
+
 enter_command_mode()
 {
 	log_debug "Entering COMMAND mode"
-	CURRENT_INPUT=""
+	CURRENT_INPUT="$CURRENT_COMMAND"
+	COMMAND_HISTORY_POSITION="${#COMMAND_HISTORY[@]}"
 	MODE="command"
 	render_input
 }
@@ -39,9 +53,34 @@ command_hidden()
 			set_input_message "Disabled showing .hidden files"
 			set_hidden 0
 			;;
-		*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
+*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
 	esac
 	reset_mode
+}
+
+move_command_history()
+{
+	local history_size="${#COMMAND_HISTORY[@]}"
+	local dest="$(($COMMAND_HISTORY_POSITION + $1))"
+	if [[ "$dest" -ge "$history_size" ]]; then
+		CURRENT_INPUT="$COMMAND_DRAFT"
+		CURRENT_COMMAND="$CURRENT_INPUT"
+		dest="$history_size"
+	elif [[ "$dest" -ge "0" ]]; then
+		CURRENT_INPUT="${COMMAND_HISTORY[$dest]}"
+		CURRENT_COMMAND="$CURRENT_INPUT"
+	else
+		dest="0"
+	fi
+	COMMAND_HISTORY_POSITION="$dest"
+	render_input
+}
+
+update_command_draft()
+{
+	if [[ "$dest" -ge "$history_size" ]]; then
+		COMMAND_DRAFT="$CURRENT_COMMAND"
+	fi
 }
 
 mark_file()
@@ -158,5 +197,7 @@ execute_command()
 		q|quit) exit 0;;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
 	esac
+	COMMAND_HISTORY+=("$CURRENT_COMMAND")
+	CURRENT_COMMAND=""
 	reset_mode
 }

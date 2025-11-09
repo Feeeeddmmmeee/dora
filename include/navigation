@@ -67,6 +67,7 @@ set_sorting()
 {
 	init_sorting "$@"
 	directory_change
+	sync_search_files
 	update_search
 }
 

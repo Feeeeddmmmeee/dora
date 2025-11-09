@@ -57,6 +57,9 @@ add_character()
 		grep)
 			GREP_PATTERN="$CURRENT_INPUT"
 			update_grep_result;;
+		command)
+			CURRENT_COMMAND="$CURRENT_INPUT"
+			update_command_draft;;
 	esac
 }
 
@@ -77,6 +80,9 @@ remove_character()
 		grep)
 			GREP_PATTERN="$CURRENT_INPUT"
 			update_grep_result;;
+		command)
+			CURRENT_COMMAND="$CURRENT_INPUT"
+			update_command_draft;;
 	esac
 }
 
@@ -148,6 +154,10 @@ exit_input()
 		search) 
 			reset_search
 			directory_change
+			;;
+		grep)
+			GREP_PATTERN=""
+			enter_preview_mode
 			;;
 	esac
 	reset_mode
@@ -239,6 +249,15 @@ main()
 					't') start_command "create ";;
 					'?') enter_grep_mode;;
 					q) exit;;
+				esac;;
+			command)
+				case "$input" in
+					'[A') move_command_history -1;;
+					'[B') move_command_history 1;;
+					'ESCAPE') exit_input;;
+					'BACKSPACE') remove_character;;
+					'RETURN') execute_input;;
+					*) add_character "$input";;
 				esac;;
 			*)
 				case "$input" in
