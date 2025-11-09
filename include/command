@@ -28,7 +28,7 @@ command_add_character()
 
 command_remove_character()
 {
-	if [ -z $CURRENT_COMMAND ]; then
+	if [ -z "$CURRENT_COMMAND" ]; then
 		reset_mode
 		return
 	fi
