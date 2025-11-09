@@ -10,7 +10,7 @@ source include/search
 init_sorting "type"
 PIPE=
 
-# normal, command
+# normal, command, search
 MODE="normal" 
 CURRENT_INPUT=""
 CURRENT_MESSAGE=""
