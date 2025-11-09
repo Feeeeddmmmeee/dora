@@ -112,8 +112,8 @@ handle_keyboard_input()
 		if [[ $input == $'\x1b' ]]; then
 			local rest=""
 			while IFS= read -rsn1 -t 0.01 char 2>/dev/null; do
-        rest+="$char"
-      done
+				rest+="$char"
+			done
 			if [[ -n "$rest" ]]; then
 				input="$rest"
 			else
@@ -208,7 +208,7 @@ main()
 		if [[ "$old_rows" -ne "$ROWS" || "$old_cols" -ne "$COLS" ]]; then
 			redraw
 		fi
-		
+
 		if [[ -z "$input" ]]; then
 			continue
 		fi
