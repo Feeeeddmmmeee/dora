@@ -100,9 +100,49 @@ edit_marked()
 
 			render_top
 			if [ "$MARKED_DIR" = "$CURRENT_DIR" ]; then
-				directory_change
+				redraw
 			fi
 	esac
+}
+
+start_command()
+{
+	enter_command_mode
+	CURRENT_INPUT="$1"
+	render_input
+}
+
+create_command()
+{
+	if [ $# = 0 ]; then
+		set_input_message "$(escape red_color)You must name at least one file$(escape default_color)"
+		return 1
+	fi
+
+	for file in "$@"; do
+		create_file_dir "$file"
+	done
+
+	if [ $# = 1 ]; then
+		set_input_message "Created $1"
+	else
+		set_input_message "Created $# files"
+	fi
+
+	directory_change
+}
+
+create_file_dir()
+{
+	local path="$1"
+	if [[ "$path" == */ ]]; then
+		mkdir -p "$path"
+	else
+		mkdir -p "$(dirname "$path")"
+		touch "$path"
+	fi
+
+	log_debug "Created $path"
 }
 
 execute_command()
@@ -118,7 +158,7 @@ execute_command()
 		cp|copy) edit_marked copy "$CURRENT_DIR";;
 		mv|move) edit_marked move "$CURRENT_DIR";;
 		rm|remove|delete) edit_marked delete;;
-		create|touch) true;;
+		create|touch) create_command "${tokens[@]:1}";;
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) exit 0;;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;

@@ -63,7 +63,6 @@ add_character()
 
 remove_character()
 {
-	log_info "$CURRENT_INPUT"
 	if [ -z "$CURRENT_INPUT" ]; then
 		reset_mode
 		return
@@ -231,6 +230,11 @@ main()
 					'RETURN') file_list_open;;
 					':') enter_command_mode;;
 					'/') enter_search_mode;;
+					' ') mark_file;;
+					'c') edit_marked copy "$CURRENT_DIR";;
+					'm') edit_marked move "$CURRENT_DIR";;
+					'd') edit_marked delete;;
+					't') start_command "create ";;
 					q) exit;;
 				esac;;
 			*)
