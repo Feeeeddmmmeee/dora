@@ -13,6 +13,12 @@ enter_command_mode()
 command_sort() 
 {
 	local sorting=$1
+
+	if [[ -z "$sorting" ]]; then
+		set_input_message "$(escape red_color)You must supply a sorting scheme$(escape default_color)"
+		return 1
+	fi
+
 	case "$sorting" in
 		type | size | name | mod) 
 			set_input_message "Sorting by $sorting"
@@ -38,6 +44,97 @@ command_hidden()
 	reset_mode
 }
 
+mark_file()
+{
+	# Tries to mark $1 but if empty use the currently selected file
+	MARKED=${1:-"${CURRENT_DIR_CONTENT[$SELECTED]}"}
+	MARKED_DIR="$CURRENT_DIR"
+	log_debug "Marked $MARKED_DIR$MARKED"
+	set_input_message "Marked $MARKED"
+	render_top
+}
+
+edit_marked()
+{
+	if [[ -z "$MARKED" ]]; then
+		set_input_message "$(escape red_color)No file has been marked (:mark)$(escape default_color)"
+		return 1
+	fi
+
+	local op=$1
+	case $op in
+		move)
+			local dest=$2
+			mv "$MARKED_DIR$MARKED" "$dest"
+			MARKED_DIR="$dest"
+			log_debug "Moved $MARKED_DIR$MARKED to $dest"
+			set_input_message "Moved $MARKED to $dest"
+			directory_change
+			;;
+		copy)
+			local dest=$2
+			local flags=()
+			if [[ -d "$MARKED_DIR$MARKED" ]]; then
+				flags=(-r)
+			fi
+			cp "${flags[@]}" "$MARKED_DIR$MARKED" "$dest"
+			log_debug "Copied $MARKED_DIR$MARKED to $dest"
+			set_input_message "Copied $MARKED to $dest"
+			directory_change
+			;;
+		delete)
+			rm -rf "$MARKED_DIR$MARKED"
+			log_debug "Deleted $MARKED_DIR$MARKED"
+			set_input_message "Deleted $MARKED"
+			MARKED=""
+
+			render_top
+			if [ "$MARKED_DIR" = "$CURRENT_DIR" ]; then
+				redraw
+			fi
+	esac
+}
+
+start_command()
+{
+	enter_command_mode
+	CURRENT_INPUT="$1"
+	render_input
+}
+
+create_command()
+{
+	if [ $# = 0 ]; then
+		set_input_message "$(escape red_color)You must name at least one file$(escape default_color)"
+		return 1
+	fi
+
+	for file in "$@"; do
+		create_file_dir "$file"
+	done
+
+	if [ $# = 1 ]; then
+		set_input_message "Created $1"
+	else
+		set_input_message "Created $# files"
+	fi
+
+	directory_change
+}
+
+create_file_dir()
+{
+	local path="$1"
+	if [[ "$path" == */ ]]; then
+		mkdir -p "$path"
+	else
+		mkdir -p "$(dirname "$path")"
+		touch "$path"
+	fi
+
+	log_debug "Created $path"
+}
+
 execute_command()
 {
 	local tokens=()
@@ -45,6 +142,11 @@ execute_command()
 	log_debug "Executing command \"${tokens[0]}\", full prompt: \"$CURRENT_INPUT\""
 	case "${tokens[0]}" in
 		sort) command_sort "${tokens[1]}";;
+		mark) mark_file "${tokens[1]}";;
+		cp|copy) edit_marked copy "$CURRENT_DIR";;
+		mv|move) edit_marked move "$CURRENT_DIR";;
+		rm|remove|delete) edit_marked delete;;
+		create|touch) create_command "${tokens[@]:1}";;
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) exit 0;;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
