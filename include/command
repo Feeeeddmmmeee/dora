@@ -5,7 +5,9 @@ source include/rendering
 enter_command_mode()
 {
 	log_debug "Entering COMMAND mode"
+	CURRENT_INPUT=""
 	MODE="command"
+	render_input
 }
 
 command_sort() 
