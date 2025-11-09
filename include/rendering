@@ -112,7 +112,7 @@ render_top()
 	selected="$(escape blue_color)$CURRENT_DIR$(escape white_color)${CURRENT_DIR_CONTENT[SELECTED]}"
 	dims="$ROWS x $COLS"
 
-	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected" "$SEARCH_QUERY" #"$dims"
+	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected" "$(get_filetype_color "$MARKED")$MARKED$(escape reset)" #"$SEARCH_QUERY" #"$dims"
 }
 
 render_input() 
