@@ -24,7 +24,7 @@ update_grep_result()
 enter_grep_mode()
 {
 	log_debug "Entering GREP mode"
-	CURRENT_INPUT="$GREP_PATTERN"
+	CURRENT_INPUT=""
 	RIGHT_PANEL_MODE="grep"
 	MODE="grep"
 	update_grep_result
