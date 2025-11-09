@@ -4,38 +4,87 @@ source include/help
 source include/grep
 source include/navigation
 source include/command
+source include/search
 
 # type, mod, name, size
 init_sorting "type"
-
-SHOW_HIDDEN=
 PIPE=
 
-# normal, command
+# normal, command, search, grep
 MODE="normal" 
+CURRENT_INPUT=""
+CURRENT_MESSAGE=""
+
 # preview, grep
 RIGHT_PANEL_MODE="preview"
 
-enter_grep_mode()
+enter_preview_mode()
 {
-	log_debug "Entering GREP right mode"
-	RIGHT_PANEL_MODE="grep"
-	update_grep_result "$1"
+	RIGHT_PANEL_MODE="preview"
+	update_right_panel_data
 	render_right_panel
 }
 
-enter_preview_mode()
+execute_input()
 {
-	log_debug "Entering PREVIEW right mode"
-	RIGHT_PANEL_MODE="preview"
-	update_selected_content
-	render_right_panel
+	case "$MODE" in
+		command) execute_command;;
+		search) reset_mode;;
+		grep) 
+			if [[ -z "$GREP_PATTERN" ]]; then
+				enter_preview_mode
+			fi
+			reset_mode;;
+	esac
+}
+
+set_input_message()
+{
+	CURRENT_MESSAGE="$1"
+	log_debug "Setting message: \"$CURRENT_MESSAGE\""
+	render_input
+}
+
+add_character()
+{
+	CURRENT_INPUT+="$1"
+	render_input
+
+	case  "$MODE" in
+		search) 
+			SEARCH_QUERY="$CURRENT_INPUT"
+			update_search;;
+		grep)
+			GREP_PATTERN="$CURRENT_INPUT"
+			update_grep_result;;
+	esac
+}
+
+remove_character()
+{
+	if [ -z "$CURRENT_INPUT" ]; then
+		reset_mode
+		return
+	fi
+	CURRENT_INPUT="${CURRENT_INPUT:0:-1}"
+	render_input
+
+	case  "$MODE" in
+		search) 
+			SEARCH_QUERY="$CURRENT_INPUT"
+			update_search;;
+		grep)
+			GREP_PATTERN="$CURRENT_INPUT"
+			update_grep_result;;
+	esac
 }
 
 reset_mode() {
 	log_debug "Entering NORMAL mode"
 	MODE="normal"
-	render_command
+	render_input
+	escape cursor_disable_blinking
+	escape hide_cursor
 }
 
 fatal()
@@ -86,6 +135,19 @@ handle_keyboard_input()
 	done
 }
 
+exit_input()
+{
+	CURRENT_MESSAGE=""
+	escape hide_cursor
+	case "$MODE" in
+		search) 
+			reset_search
+			directory_change
+			;;
+	esac
+	reset_mode
+}
+
 main()
 {
 	# Init logging
@@ -132,7 +194,7 @@ main()
 	PIPE=/tmp/dora_keyboard_input_$$
 	mkfifo $PIPE
 	exec {fd}<>$PIPE
-	exec 2>$LOG_FILE
+	exec 2>"$LOG_FILE"
 
 	exec {fd2}</dev/tty
 	handle_keyboard_input <&$fd2 &
@@ -162,14 +224,16 @@ main()
 					'[D' | h | -) file_list_open ..;;
 					'RETURN') file_list_open;;
 					':') enter_command_mode;;
+					'/') enter_search_mode;;
+					'?') enter_grep_mode;;
 					q) exit;;
 				esac;;
-			command)
+			*)
 				case "$input" in
-					'ESCAPE') reset_mode;;
-					'BACKSPACE') command_remove_character;;
-					'RETURN') execute_command;;
-					*) command_add_character "$input";;
+					'ESCAPE') exit_input;;
+					'BACKSPACE') remove_character;;
+					'RETURN') execute_input;;
+					*) add_character "$input";;
 				esac;;
 		esac
 	done

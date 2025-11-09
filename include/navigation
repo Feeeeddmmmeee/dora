@@ -7,7 +7,10 @@ SELECTED=0
 FILE_LIST_OFFSET=0
 CURRENT_DIR_CONTENT=()
 SELECTED_CONTENT=
-LS_FLAGS=()
+LS_SORTING_FLAGS=()
+
+LS_HIDDEN_FLAGS=(-A)
+SHOW_HIDDEN=1
 
 # Rerenders components which depend on the currently active file
 # (except the dir content as its handled separately)
@@ -32,40 +35,86 @@ directory_change()
 	render_right_panel
 }
 
+# Works like directory_change() but doesn't update the current
+# directory content
+search_change()
+{
+	SELECTED=0
+	escape hide_cursor
+	clear_file_list
+	render_entire_file_list
+	render_top
+	render_bottom
+	update_selected_content
+	if [ "$MODE" = "search" ]; then
+		render_input
+	fi
+}
+
+grep_change()
+{
+	escape hide_cursor
+	if [ "$MODE" = "grep" ]; then
+		render_right_panel
+		render_input
+	fi
+}
+
 set_sorting()
 {
 	init_sorting "$@"
 	directory_change
+	update_search
 }
 
 init_sorting()
 {
 	SORTING=$1
 	log_debug "Sorting mode set to: \"$SORTING\"";
-	LS_FLAGS=()
+	LS_SORTING_FLAGS=()
 	case "$SORTING" in
-		type) LS_FLAGS=(--group-directories-first);;
-		size) LS_FLAGS=(-S);;
-		name) LS_FLAGS=();;
-		mod) LS_FLAGS=(-t);;
+		type) LS_SORTING_FLAGS=(--group-directories-first);;
+		size) LS_SORTING_FLAGS=(-S);;
+		name) LS_SORTING_FLAGS=();;
+		mod) LS_SORTING_FLAGS=(-t);;
 	esac
+}
+
+set_hidden()
+{
+	SHOW_HIDDEN=$1
+	LS_HIDDEN_FLAGS=()
+	if [ "$SHOW_HIDDEN" = "1" ]; then
+		LS_HIDDEN_FLAGS=(-A)
+	fi
+	redraw
+	sync_search_files
+	update_search
 }
 
 get_current_dir_content() 
 {
 	# Load the output of ls into the CURRENT_DIR_CONTENT array
-	mapfile -t CURRENT_DIR_CONTENT < <(ls -A "${LS_FLAGS[@]}" "$CURRENT_DIR")
+	mapfile -t CURRENT_DIR_CONTENT < <(ls "${LS_HIDDEN_FLAGS[@]}" "${LS_SORTING_FLAGS[@]}" "$CURRENT_DIR")
 }
 
 update_selected_content()
 {
+	local dir_size=${#CURRENT_DIR_CONTENT[@]}
+	
+	if [[ "$dir_size" = "0" ]]; then
+		SELECTED_CONTENT=
+		render_selected_content
+		return 1
+	fi
+
 	local height=$((ROWS - 3))
 	local content=
 	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
 
 	if [ -d "$selected" ]; then
 		local files
-		files="$(ls -A "${LS_FLAGS[@]}" "$selected")"
+		files="$(ls "${LS_HIDDEN_FLAGS[@]}" "${LS_SORTING_FLAGS[@]}" "$selected")"
 		content=$(parse_file_list "$(head -"$height" <<< "$files")" "$selected")
 	# Don't try to render binary files
 	elif file --mime-encoding "$selected" | grep -q binary; then
@@ -148,12 +197,13 @@ file_list_move_selection()
 file_list_open()
 {
 	local dest="${1:-$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}}"
+	reset_search
 
 	if [[ -d "$dest" ]]; then
 		cd "$dest" &>/dev/null && log_debug "Going to $dest" || \
 			{ 
 				log_debug "Going to $dest failed" 
-				set_command_line_message "`escape red_color`Failed to open $dest`escape default_color`"
+				set_command_line_message "$(escape red_color)Failed to open $dest$(escape default_color)"
 			}
 		CURRENT_DIR="$(pwd)/"
 
