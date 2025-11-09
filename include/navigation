@@ -175,7 +175,14 @@ file_list_move_selection()
 	fi
 
 	if is_file_visible $SELECTED; then
-		FILE_LIST_OFFSET=$((FILE_LIST_OFFSET + jump_size))
+		local offa offb
+
+		# Make sure offset isn't out of bounds
+		offb=$((dir_size - ROWS + 4))
+		offa=$((FILE_LIST_OFFSET + jump_size))
+		FILE_LIST_OFFSET=$((offa>offb ? offb : offa))
+		FILE_LIST_OFFSET=$((FILE_LIST_OFFSET>0 ?FILE_LIST_OFFSET : 0))
+
 		render_entire_file_list
 	else
 		render_file_list_entry $SELECTED

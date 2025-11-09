@@ -178,9 +178,8 @@ render_file_list_entry()
 {
 	local id=$1
 	local pos=$((id-FILE_LIST_OFFSET+2))
-	is_file_visible "$id"
-	local visible=$?
-	if [[ "$visible" = "1" ]]; then
+
+	if ! is_file_visible "$id"; then
 		escape set_cursor $pos
 		if (( id == SELECTED )); then
 			escape invert_color

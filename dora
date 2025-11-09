@@ -109,21 +109,23 @@ handle_keyboard_input()
 		local input=""
 		IFS= read -rsn1  input 2>/dev/null || return
 		# Read 2 chars if first char is an escape charcter (to handle arrow keys)
-		if [[ $input == $'\x1b' ]]; then
-			local rest=""
-			while IFS= read -rsn1 -t 0.01 char 2>/dev/null; do
-				rest+="$char"
-			done
-			if [[ -n "$rest" ]]; then
-				input="$rest"
-			else
-				input="ESCAPE"
-			fi
-		elif [[ $input = $'\x08' || $input = $'\x7f' ]]; then
-			input="BACKSPACE"
-		elif [[ $input = " " ]]; then
-			input=" "
-		fi
+		case "$input" in
+			$'\x1b')
+				local rest=""
+				while IFS= read -rsn1 -t 0.01 char 2>/dev/null; do
+					rest+="$char"
+				done
+				if [[ -n "$rest" ]]; then
+					input="$rest"
+				else
+					input="ESCAPE"
+				fi
+				;;
+			$'\x08' | $'\x07') input="BACKSPACE" ;;
+			" ") input=" " ;;
+			$'\x15') input="CTRL-U";;
+			$'\x04') input="CTRL-D";;
+		esac
 
 		if [[ -n "$input" ]]; then
 			echo "$input" >&$fd
@@ -218,6 +220,8 @@ main()
 				case "$input" in
 					'[A' | k) file_list_move_selection -1;;
 					'[B' | j) file_list_move_selection 1;;
+					'CTRL-U') file_list_move_selection $(((ROWS - 3)/-2));;
+					'CTRL-D') file_list_move_selection $(((ROWS - 3)/2));;
 					'[C' | l) file_list_open;;
 					'[D' | h | -) file_list_open ..;;
 					'RETURN') file_list_open;;
