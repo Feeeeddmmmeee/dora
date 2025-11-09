@@ -14,6 +14,8 @@ MODE="normal"
 reset_mode() {
 	MODE="normal"
 	render_command
+	escape cursor_disable_blinking
+	escape hide_cursor
 }
 
 fatal()

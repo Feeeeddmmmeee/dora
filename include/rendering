@@ -29,6 +29,8 @@ escape()
 {
 	case "$1" in
 		clear) printf "\e[2J";;
+		cursor_enable_blinking) printf "\e[2q";;
+		cursor_disable_blinking) printf "\e[0q";;
 		save_term) printf "\e[?1049h";;
 		restore_term) printf "\e[?1049l";;
 		save_cursor) printf "\e7";;
@@ -116,15 +118,18 @@ render_top()
 render_command() 
 {
 	if [[ "$MODE" = "command" ]]; then
-		escape set_cursor $ROWS
+		escape show_cursor
+		escape cursor_enable_blinking
+		escape set_cursor "$ROWS"
 		clean="${CURRENT_COMMAND//$'\n'/}"
-		clean="${clean:0:$(($COLS-1))}"
-		printf ":%-$(($COLS-1))s" "$clean"
+		clean="${clean:0:$((COLS-1))}"
+		printf ":%-$((COLS-1))s" "$clean"
+		escape set_cursor "$ROWS" $((${#CURRENT_COMMAND} + 2))
 	else
-		escape set_cursor $ROWS
+		escape set_cursor "$ROWS"
 		clean="${CURRENT_MESSAGE//$'\n'/}"
-		clean="${clean:0:$(($COLS-1))}"
-		printf "%-$(($COLS-1))s" "$clean"
+		clean="${clean:0:$((COLS-1))}"
+		printf "%-$((COLS-1))s" "$clean"
 	fi
 }
 

@@ -61,6 +61,7 @@ command_hidden()
 			;;
 		*) set_command_line_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
 	esac
+	reset_mode
 }
 
 execute_command()
