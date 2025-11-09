@@ -156,7 +156,6 @@ exit_input()
 			directory_change
 			;;
 		grep)
-			GREP_PATTERN=""
 			enter_preview_mode
 			;;
 	esac
