@@ -29,6 +29,8 @@ escape()
 {
 	case "$1" in
 		clear) printf "\e[2J";;
+		cursor_enable_blinking) printf "\e[2q";;
+		cursor_disable_blinking) printf "\e[0q";;
 		save_term) printf "\e[?1049h";;
 		restore_term) printf "\e[?1049l";;
 		save_cursor) printf "\e7";;
@@ -77,9 +79,9 @@ justify_to_term_width()
 	right_no_escape=$(sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g' <<< "$right")
 
 	local len=$((COLS - ${#left_no_escape} - ${#right_no_escape}))
-	spaces=$(printf "%${len}s" "")
-	printf "%s" "$left$spaces$right"
-}
+		spaces=$(printf "%${len}s" "")
+		printf "%s" "$left$spaces$right"
+	}
 
 render_bottom()
 {
@@ -93,9 +95,9 @@ render_bottom()
 		file_info="$file_info$(format_bytes "$(stat -c "%s" "$selected")") "
 		file_info="$file_info$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M') $(escape reset)"
 		index="($((SELECTED + 1))/${#CURRENT_DIR_CONTENT[@]})"
-	else
-		file_info="$(escape reset)"
-		index="(0/0)"
+		else
+			file_info="$(escape reset)"
+			index="(0/0)"
 	fi
 
 	dir_info="$(escape blue_color)$(escape invert_color)$index"
@@ -110,22 +112,37 @@ render_top()
 	selected="$(escape blue_color)$CURRENT_DIR$(escape white_color)${CURRENT_DIR_CONTENT[SELECTED]}"
 	dims="$ROWS x $COLS"
 
-	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected" "$dims"
+	justify_to_term_width "$(escape green_color)$(whoami)@$(uname -n)$(escape white_color) $selected" "$SEARCH_QUERY" #"$dims"
 }
 
-render_command() 
+render_input() 
 {
-	if [[ "$MODE" = "command" ]]; then
-		escape set_cursor $ROWS
-		clean="${CURRENT_COMMAND//$'\n'/}"
-		clean="${clean:0:$(($COLS-1))}"
-		printf ":%-$(($COLS-1))s" "$clean"
-	else
-		escape set_cursor $ROWS
-		clean="${CURRENT_MESSAGE//$'\n'/}"
-		clean="${clean:0:$(($COLS-1))}"
-		printf "%-$(($COLS-1))s" "$clean"
-	fi
+	case "$MODE" in
+		command)
+			escape show_cursor
+			escape cursor_enable_blinking
+			escape set_cursor "$ROWS"
+			clean="${CURRENT_INPUT//$'\n'/}"
+			clean="${clean:0:$((COLS-1))}"
+			printf ":%-$((COLS-1))s" "$clean"
+			escape set_cursor "$ROWS" $((${#CURRENT_INPUT} + 2))
+			;;
+		search)
+			escape show_cursor
+			escape cursor_enable_blinking
+			escape set_cursor "$ROWS"
+			clean="${CURRENT_INPUT//$'\n'/}"
+			clean="${clean:0:$((COLS-1))}"
+			printf "/%-$((COLS-1))s" "$clean"
+			escape set_cursor "$ROWS" $((${#CURRENT_INPUT} + 2))
+			;;
+		*)
+			escape set_cursor "$ROWS"
+			clean="${CURRENT_MESSAGE//$'\n'/}"
+			clean="${clean:0:$((COLS-1))}"
+			printf "%-$((COLS-1))s" "$clean"
+			;;
+	esac
 }
 
 clear_file_list()

@@ -2,38 +2,12 @@
 
 source include/rendering
 
-CURRENT_COMMAND=""
-CURRENT_MESSAGE=""
-
-set_command_line_message()
-{
-	CURRENT_MESSAGE="$1"
-	log_debug "Setting message: \"$CURRENT_MESSAGE\""
-	render_command
-}
-
 enter_command_mode()
 {
 	log_debug "Entering COMMAND mode"
 	MODE="command"
-	CURRENT_COMMAND=""
-	render_command
-}
-
-command_add_character()
-{
-	CURRENT_COMMAND+="$1"
-	render_command
-}
-
-command_remove_character()
-{
-	if [ -z $CURRENT_COMMAND ]; then
-		reset_mode
-		return
-	fi
-	CURRENT_COMMAND="${CURRENT_COMMAND:0:-1}"
-	render_command
+	CURRENT_INPUT=""
+	render_input
 }
 
 command_sort() 
@@ -41,9 +15,9 @@ command_sort()
 	local sorting=$1
 	case "$sorting" in
 		type | size | name | mod) 
-			set_command_line_message "Sorting by $sorting"
+			set_input_message "Sorting by $sorting"
 			set_sorting "$sorting";;
-		*) set_command_line_message "`escape red_color`$sorting is not a supported sorting scheme`escape default_color`";;
+		*) set_input_message "$(escape red_color)$sorting is not a supported sorting scheme$(escape default_color)";;
 	esac
 }
 
@@ -55,18 +29,36 @@ command_grep()
 command_preview()
 {
 	enter_preview_mode
+command_hidden()
+{
+	local arg=$1
+	case "$arg" in
+		true|1|yes)
+			set_input_message "Enabled showing .hidden files"
+			set_hidden 1
+			;;
+		false|0|no)
+			set_input_message "Disabled showing .hidden files"
+			set_hidden 0
+			;;
+		*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
+	esac
+	reset_mode
 }
 
 execute_command()
 {
 	local tokens=()
-	read -a tokens <<< "$CURRENT_COMMAND" 2>/dev/null
-	log_debug "Executing command sort: \"${tokens[0]}\", full prompt: \"$CURRENT_COMMAND\""
+	read -ra tokens <<< "$CURRENT_INPUT" 2>/dev/null
+	log_debug "Executing command \"${tokens[0]}\", full prompt: \"$CURRENT_INPUT\""
 	case "${tokens[0]}" in
 		sort) command_sort "${tokens[1]}";;
 		grep) command_grep "${tokens[@]:1}";;
 		preview) command_preview;;
 		*) set_command_line_message "`escape red_color`Command ${tokens[0]} not found`escape default_color`"
+		hidden) command_hidden "${tokens[1]}";;
+		q|quit) exit 0;;
+		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
 	esac
 	reset_mode
 }
