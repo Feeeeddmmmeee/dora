@@ -30,11 +30,7 @@ execute_input()
 	case "$MODE" in
 		command) execute_command;;
 		search) reset_mode;;
-		grep) 
-			if [[ -z "$GREP_PATTERN" ]]; then
-				enter_preview_mode
-			fi
-			reset_mode;;
+		grep) reset_mode;;
 	esac
 }
 
@@ -156,7 +152,7 @@ exit_input()
 			directory_change
 			;;
 		grep)
-			enter_preview_mode
+			reset_grep
 			;;
 	esac
 	reset_mode
