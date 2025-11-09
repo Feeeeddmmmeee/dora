@@ -6,8 +6,6 @@ source include/command
 
 # type, mod, name, size
 init_sorting "type"
-
-SHOW_HIDDEN=
 PIPE=
 
 # normal, command

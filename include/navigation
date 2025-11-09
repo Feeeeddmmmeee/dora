@@ -7,7 +7,10 @@ SELECTED=0
 FILE_LIST_OFFSET=0
 CURRENT_DIR_CONTENT=()
 SELECTED_CONTENT=
-LS_FLAGS=()
+LS_SORTING_FLAGS=()
+
+LS_HIDDEN_FLAGS=(-A)
+SHOW_HIDDEN=1
 
 # Rerenders components which depend on the currently active file
 # (except the dir content as its handled separately)
@@ -40,19 +43,29 @@ init_sorting()
 {
 	SORTING=$1
 	log_debug "Sorting mode set to: \"$SORTING\"";
-	LS_FLAGS=()
+	LS_SORTING_FLAGS=()
 	case "$SORTING" in
-		type) LS_FLAGS=(--group-directories-first);;
-		size) LS_FLAGS=(-S);;
-		name) LS_FLAGS=();;
-		mod) LS_FLAGS=(-t);;
+		type) LS_SORTING_FLAGS=(--group-directories-first);;
+		size) LS_SORTING_FLAGS=(-S);;
+		name) LS_SORTING_FLAGS=();;
+		mod) LS_SORTING_FLAGS=(-t);;
 	esac
+}
+
+set_hidden()
+{
+	SHOW_HIDDEN=$1
+	LS_HIDDEN_FLAGS=()
+	if [ "$SHOW_HIDDEN" = "1" ]; then
+		LS_HIDDEN_FLAGS=(-A)
+	fi
+	redraw
 }
 
 get_current_dir_content() 
 {
 	# Load the output of ls into the CURRENT_DIR_CONTENT array
-	mapfile -t CURRENT_DIR_CONTENT < <(ls -A "${LS_FLAGS[@]}" "$CURRENT_DIR")
+	mapfile -t CURRENT_DIR_CONTENT < <(ls "${LS_HIDDEN_FLAGS[@]}" "${LS_SORTING_FLAGS[@]}" "$CURRENT_DIR")
 }
 
 update_selected_content()
@@ -63,7 +76,7 @@ update_selected_content()
 
 	if [ -d "$selected" ]; then
 		local files
-		files="$(ls -A "${LS_FLAGS[@]}" "$selected")"
+		files="$(ls "${LS_HIDDEN_FLAGS[@]}" "${LS_SORTING_FLAGS[@]}" "$selected")"
 		content=$(parse_file_list "$(head -"$height" <<< "$files")" "$selected")
 	# Don't try to render binary files
 	elif file --mime-encoding "$selected" | grep -q binary; then

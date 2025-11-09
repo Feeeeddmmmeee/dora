@@ -28,7 +28,7 @@ command_add_character()
 
 command_remove_character()
 {
-	if [ -z $CURRENT_COMMAND ]; then
+	if [ -z "$CURRENT_COMMAND" ]; then
 		reset_mode
 		return
 	fi
@@ -43,18 +43,35 @@ command_sort()
 		type | size | name | mod) 
 			set_command_line_message "Sorting by $sorting"
 			set_sorting "$sorting";;
-		*) set_command_line_message "`escape red_color`$sorting is not a supported sorting scheme`escape default_color`";;
+		*) set_command_line_message "$(escape red_color)$sorting is not a supported sorting scheme$(escape default_color)";;
+	esac
+}
+
+command_hidden()
+{
+	local arg=$1
+	case "$arg" in
+		true|1|yes)
+			set_command_line_message "Enabled showing .hidden files"
+			set_hidden 1
+			;;
+		false|0|no)
+			set_command_line_message "Disabled showing .hidden files"
+			set_hidden 0
+			;;
+		*) set_command_line_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
 	esac
 }
 
 execute_command()
 {
 	local tokens=()
-	read -a tokens <<< "$CURRENT_COMMAND" 2>/dev/null
-	log_debug "Executing command sort: \"${tokens[0]}\", full prompt: \"$CURRENT_COMMAND\""
+	read -ra tokens <<< "$CURRENT_COMMAND" 2>/dev/null
+	log_debug "Executing command \"${tokens[0]}\", full prompt: \"$CURRENT_COMMAND\""
 	case "${tokens[0]}" in
 		sort) command_sort "${tokens[1]}";;
-		*) set_command_line_message "`escape red_color`Command ${tokens[0]} not found`escape default_color`"
+		hidden) command_hidden "${tokens[1]}";;
+		*) set_command_line_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)"
 	esac
 	reset_mode
 }
