@@ -4,6 +4,9 @@ source include/rendering
 
 CURRENT_COMMAND=""
 CURRENT_MESSAGE=""
+COMMAND_HISTORY=()
+COMMAND_HISTORY_POSITION="-1"
+COMMAND_DRAFT=""
 
 set_command_line_message()
 {
@@ -23,6 +26,7 @@ enter_command_mode()
 command_add_character()
 {
 	CURRENT_COMMAND+="$1"
+	COMMAND_DRAFT+="$1"
 	render_command
 }
 
@@ -57,15 +61,22 @@ command_preview()
 	enter_preview_mode
 }
 
+move_command_history()
+{
+	true
+}
+
 execute_command()
 {
 	local tokens=()
 	read -a tokens <<< "$CURRENT_COMMAND" 2>/dev/null
+	COMMAND_HISTORY+="$CURRENT_COMMAND"
 	log_debug "Executing command sort: \"${tokens[0]}\", full prompt: \"$CURRENT_COMMAND\""
 	case "${tokens[0]}" in
 		sort) command_sort "${tokens[1]}";;
 		grep) command_grep "${tokens[@]:1}";;
 		preview) command_preview;;
+		q) exit;;
 		*) set_command_line_message "`escape red_color`Command ${tokens[0]} not found`escape default_color`"
 	esac
 	reset_mode
