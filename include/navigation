@@ -51,6 +51,15 @@ search_change()
 	fi
 }
 
+grep_change()
+{
+	escape hide_cursor
+	if [ "$MODE" = "grep" ]; then
+		render_right_panel
+		render_input
+	fi
+}
+
 set_sorting()
 {
 	init_sorting "$@"

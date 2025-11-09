@@ -10,7 +10,7 @@ source include/search
 init_sorting "type"
 PIPE=
 
-# normal, command, search
+# normal, command, search, grep
 MODE="normal" 
 CURRENT_INPUT=""
 CURRENT_MESSAGE=""
@@ -18,19 +18,10 @@ CURRENT_MESSAGE=""
 # preview, grep
 RIGHT_PANEL_MODE="preview"
 
-enter_grep_mode()
-{
-	log_debug "Entering GREP right mode"
-	RIGHT_PANEL_MODE="grep"
-	update_grep_result "$1"
-	render_right_panel
-}
-
 enter_preview_mode()
 {
-	log_debug "Entering PREVIEW right mode"
 	RIGHT_PANEL_MODE="preview"
-	update_selected_content
+	update_right_panel_data
 	render_right_panel
 }
 
@@ -39,6 +30,11 @@ execute_input()
 	case "$MODE" in
 		command) execute_command;;
 		search) reset_mode;;
+		grep) 
+			if [[ -z "$GREP_PATTERN" ]]; then
+				enter_preview_mode
+			fi
+			reset_mode;;
 	esac
 }
 
@@ -58,6 +54,9 @@ add_character()
 		search) 
 			SEARCH_QUERY="$CURRENT_INPUT"
 			update_search;;
+		grep)
+			GREP_PATTERN="$CURRENT_INPUT"
+			update_grep_result;;
 	esac
 }
 
@@ -74,6 +73,9 @@ remove_character()
 		search) 
 			SEARCH_QUERY="$CURRENT_INPUT"
 			update_search;;
+		grep)
+			GREP_PATTERN="$CURRENT_INPUT"
+			update_grep_result;;
 	esac
 }
 
@@ -223,6 +225,7 @@ main()
 					'RETURN') file_list_open;;
 					':') enter_command_mode;;
 					'/') enter_search_mode;;
+					'?') enter_grep_mode;;
 					q) exit;;
 				esac;;
 			*)
