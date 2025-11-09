@@ -33,10 +33,27 @@ directory_change()
 	update_selected_content
 }
 
+# Works like directory_change() but doesn't update the current
+# directory content
+search_change()
+{
+	SELECTED=0
+	escape hide_cursor
+	clear_file_list
+	render_entire_file_list
+	render_top
+	render_bottom
+	update_selected_content
+	if [ "$MODE" = "search" ]; then
+		render_input
+	fi
+}
+
 set_sorting()
 {
 	init_sorting "$@"
 	directory_change
+	update_search
 }
 
 init_sorting()
@@ -60,6 +77,8 @@ set_hidden()
 		LS_HIDDEN_FLAGS=(-A)
 	fi
 	redraw
+	sync_search_files
+	update_search
 }
 
 get_current_dir_content() 
@@ -70,6 +89,14 @@ get_current_dir_content()
 
 update_selected_content()
 {
+	local dir_size=${#CURRENT_DIR_CONTENT[@]}
+	
+	if [[ "$dir_size" = "0" ]]; then
+		SELECTED_CONTENT=
+		render_selected_content
+		return 1
+	fi
+
 	local height=$((ROWS - 3))
 	local content=
 	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
@@ -152,12 +179,13 @@ file_list_move_selection()
 file_list_open()
 {
 	local dest="${1:-$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}}"
+	reset_search
 
 	if [[ -d "$dest" ]]; then
 		cd "$dest" &>/dev/null && log_debug "Going to $dest" || \
 			{ 
 				log_debug "Going to $dest failed" 
-				set_command_line_message "`escape red_color`Failed to open $dest`escape default_color`"
+				set_command_line_message "$(escape red_color)Failed to open $dest$(escape default_color)"
 			}
 		CURRENT_DIR="$(pwd)/"
 
