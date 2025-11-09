@@ -119,21 +119,30 @@ render_input()
 {
 	case "$MODE" in
 		command)
+			escape set_cursor "$ROWS"
 			escape show_cursor
 			escape cursor_enable_blinking
-			escape set_cursor "$ROWS"
 			clean="${CURRENT_INPUT//$'\n'/}"
 			clean="${clean:0:$((COLS-1))}"
 			printf ":%-$((COLS-1))s" "$clean"
 			escape set_cursor "$ROWS" $((${#CURRENT_INPUT} + 2))
 			;;
 		search)
+			escape set_cursor "$ROWS"
 			escape show_cursor
 			escape cursor_enable_blinking
-			escape set_cursor "$ROWS"
 			clean="${CURRENT_INPUT//$'\n'/}"
 			clean="${clean:0:$((COLS-1))}"
 			printf "/%-$((COLS-1))s" "$clean"
+			escape set_cursor "$ROWS" $((${#CURRENT_INPUT} + 2))
+			;;
+		grep)
+			escape set_cursor "$ROWS"
+			escape show_cursor
+			escape cursor_enable_blinking
+			clean="${CURRENT_INPUT//$'\n'/}"
+			clean="${clean:0:$((COLS-1))}"
+			printf "?%-$((COLS-1))s" "$clean"
 			escape set_cursor "$ROWS" $((${#CURRENT_INPUT} + 2))
 			;;
 		*)
@@ -261,6 +270,7 @@ redraw()
 	render_entire_file_list
 	render_top
 	render_bottom
-	update_selected_content
+	update_right_panel_data
 	render_right_panel
+	render_input
 }

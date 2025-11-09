@@ -8,8 +8,7 @@ GREP_PATTERN=""
 update_grep_result()
 {
 	if [[ -n "$1" ]]; then
-		GREP_PATTERN="$1"
-		log_debug "New grep pattern: $GREP_PATTERN"
+		GREP_PATTERN="$CURRENT_INPUT"
 	fi
 	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
 	local content=
@@ -21,4 +20,17 @@ update_grep_result()
 	fi
 
 	GREP_RESULT="$content"
+	grep_change
 }
+
+enter_grep_mode()
+{
+	log_debug "Entering GREP mode"
+	CURRENT_INPUT="$GREP_PATTERN"
+	RIGHT_PANEL_MODE="grep"
+	MODE="grep"
+	update_grep_result
+	render_right_panel
+	render_input
+}
+

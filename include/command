@@ -27,16 +27,6 @@ command_sort()
 	esac
 }
 
-command_grep()
-{
-	enter_grep_mode	"$1"
-}
-
-command_preview()
-{
-	enter_preview_mode
-}
-
 command_hidden()
 {
 	local arg=$1
@@ -152,8 +142,6 @@ execute_command()
 	log_debug "Executing command \"${tokens[0]}\", full prompt: \"$CURRENT_INPUT\""
 	case "${tokens[0]}" in
 		sort) command_sort "${tokens[1]}";;
-		grep) command_grep "${tokens[@]:1}";;
-		preview) command_preview;;
 		mark) mark_file "${tokens[1]}";;
 		cp|copy) edit_marked copy "$CURRENT_DIR";;
 		mv|move) edit_marked move "$CURRENT_DIR";;
