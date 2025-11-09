@@ -21,16 +21,6 @@ command_sort()
 	esac
 }
 
-command_grep()
-{
-	enter_grep_mode	"$1"
-}
-
-command_preview()
-{
-	enter_preview_mode
-}
-
 command_hidden()
 {
 	local arg=$1
@@ -55,8 +45,6 @@ execute_command()
 	log_debug "Executing command \"${tokens[0]}\", full prompt: \"$CURRENT_INPUT\""
 	case "${tokens[0]}" in
 		sort) command_sort "${tokens[1]}";;
-		grep) command_grep "${tokens[@]:1}";;
-		preview) command_preview;;
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) exit 0;;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
