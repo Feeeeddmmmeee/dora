@@ -47,7 +47,14 @@ command_hidden()
 mark_file()
 {
 	# Tries to mark $1 but if empty use the currently selected file
-	MARKED=${1:-"${CURRENT_DIR_CONTENT[$SELECTED]}"}
+	local mark=${1:-"${CURRENT_DIR_CONTENT[$SELECTED]}"}
+
+	if ! [ -e "$CURRENT_DIR$mark" ]; then
+		set_input_message "$(escape red_color)$mark doesn't exist$(escape default_color)"
+		return 1
+	fi
+
+	MARKED=$mark
 	MARKED_DIR="$CURRENT_DIR"
 	log_debug "Marked $MARKED_DIR$MARKED"
 	set_input_message "Marked $MARKED"
