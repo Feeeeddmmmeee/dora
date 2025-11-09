@@ -192,7 +192,7 @@ main()
 	PIPE=/tmp/dora_keyboard_input_$$
 	mkfifo $PIPE
 	exec {fd}<>$PIPE
-	exec 2>$LOG_FILE
+	exec 2>"$LOG_FILE"
 
 	exec {fd2}</dev/tty
 	handle_keyboard_input <&$fd2 &
