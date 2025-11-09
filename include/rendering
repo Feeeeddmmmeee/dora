@@ -262,7 +262,6 @@ redraw()
 	render_entire_file_list
 	render_top
 	render_bottom
-	render_command
 	update_selected_content
 	render_right_panel
 }
