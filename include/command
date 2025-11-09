@@ -29,6 +29,8 @@ command_grep()
 command_preview()
 {
 	enter_preview_mode
+}
+
 command_hidden()
 {
 	local arg=$1
@@ -55,7 +57,6 @@ execute_command()
 		sort) command_sort "${tokens[1]}";;
 		grep) command_grep "${tokens[@]:1}";;
 		preview) command_preview;;
-		*) set_command_line_message "`escape red_color`Command ${tokens[0]} not found`escape default_color`"
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) exit 0;;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
