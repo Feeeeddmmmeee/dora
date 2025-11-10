@@ -244,6 +244,7 @@ main()
 					'c') edit_marked copy "$CURRENT_DIR";;
 					'm') edit_marked move "$CURRENT_DIR";;
 					'd') edit_marked delete;;
+					'x') edit_marked toggle_executable;;
 					't') start_command "create ";;
 					'?') enter_grep_mode;;
 					q) exit;;
