@@ -67,7 +67,7 @@ command_hidden()
 			set_input_message "Disabled showing .hidden files"
 			set_hidden 0
 			;;
-*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
+		*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
 	esac
 	reset_mode
 }
