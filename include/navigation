@@ -91,7 +91,7 @@ set_hidden()
 	if [ "$SHOW_HIDDEN" = "1" ]; then
 		LS_HIDDEN_FLAGS=(-A)
 	fi
-	redraw
+	directory_change
 	sync_search_files
 	update_search
 }

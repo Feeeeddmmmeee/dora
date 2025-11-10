@@ -67,7 +67,7 @@ command_hidden()
 			set_input_message "Disabled showing .hidden files"
 			set_hidden 0
 			;;
-*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
+		*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
 	esac
 	reset_mode
 }
@@ -148,10 +148,28 @@ edit_marked()
 			set_input_message "Deleted $MARKED"
 			MARKED=""
 
-			render_top
-			if [ "$MARKED_DIR" = "$CURRENT_DIR" ]; then
-				redraw
+			directory_change
+			;;
+		toggle_executable)
+			# Directories are supported too
+			local file="$MARKED_DIR$MARKED"
+			if [ -x "$file" ]; then
+				chmod -x "$file"
+				set_input_message "Removed execute permission from $MARKED"
+			else
+				chmod +x "$file"
+				set_input_message "Added execute permission to $MARKED"
 			fi
+			directory_change
+			;;
+		rename)
+			local name=$2
+			mv "$MARKED_DIR$MARKED" "$MARKED_DIR$name"
+			log_debug "Renamed $MARKED_DIR$MARKED to $name"
+			set_input_message "Renamed $MARKED to $name"
+			MARKED="$name"
+			directory_change
+			;;
 	esac
 }
 
@@ -206,6 +224,7 @@ execute_command()
 		cp|copy) edit_marked copy "$CURRENT_DIR";;
 		mv|move) edit_marked move "$CURRENT_DIR";;
 		rm|remove|delete) edit_marked delete;;
+		rename) edit_marked rename "${tokens[1]}";;
 		create|touch) create_command "${tokens[@]:1}";;
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) exit 0;;
