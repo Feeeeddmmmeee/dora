@@ -148,10 +148,7 @@ edit_marked()
 			set_input_message "Deleted $MARKED"
 			MARKED=""
 
-			render_top
-			if [ "$MARKED_DIR" = "$CURRENT_DIR" ]; then
-				redraw
-			fi
+			directory_change
 			;;
 		toggle_executable)
 			# Directories are supported too
