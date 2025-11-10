@@ -232,6 +232,7 @@ main()
 					'[B' | j) file_list_move_selection 1;;
 					'CTRL-U') file_list_move_selection $(((ROWS - 3)/-2));;
 					'CTRL-D') file_list_move_selection $(((ROWS - 3)/2));;
+					'~') file_list_open "$HOME";;
 					'[C' | l) file_list_open;;
 					'[D' | h | -) file_list_open ..;;
 					'RETURN') file_list_open;;
