@@ -247,6 +247,7 @@ main()
 					'x') edit_marked toggle_executable;;
 					't') start_command "create ";;
 					'?') enter_grep_mode;;
+					'.') command_hidden;;
 					q) exit;;
 				esac;;
 			command)
