@@ -152,6 +152,7 @@ edit_marked()
 			if [ "$MARKED_DIR" = "$CURRENT_DIR" ]; then
 				redraw
 			fi
+			;;
 	esac
 }
 
