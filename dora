@@ -246,6 +246,7 @@ main()
 					'd') edit_marked delete;;
 					'x') edit_marked toggle_executable;;
 					't') start_command "create ";;
+					'r') start_command "rename $MARKED";;
 					'?') enter_grep_mode;;
 					'.') command_hidden;;
 					q) exit;;

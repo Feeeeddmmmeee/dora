@@ -165,6 +165,14 @@ edit_marked()
 			fi
 			directory_change
 			;;
+		rename)
+			local name=$2
+			mv "$MARKED_DIR$MARKED" "$MARKED_DIR$name"
+			log_debug "Renamed $MARKED_DIR$MARKED to $name"
+			set_input_message "Renamed $MARKED to $name"
+			MARKED="$name"
+			directory_change
+			;;
 	esac
 }
 
@@ -219,6 +227,7 @@ execute_command()
 		cp|copy) edit_marked copy "$CURRENT_DIR";;
 		mv|move) edit_marked move "$CURRENT_DIR";;
 		rm|remove|delete) edit_marked delete;;
+		rename) edit_marked rename "${tokens[1]}";;
 		create|touch) create_command "${tokens[@]:1}";;
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) exit 0;;
