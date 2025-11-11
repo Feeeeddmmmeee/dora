@@ -48,7 +48,8 @@ search_change()
 	render_entire_file_list
 	render_top
 	render_bottom
-	update_selected_content
+	update_right_panel_data
+	render_right_panel
 	if [ "$MODE" = "search" ]; then
 		render_input
 	fi
@@ -91,7 +92,7 @@ set_hidden()
 	if [ "$SHOW_HIDDEN" = "1" ]; then
 		LS_HIDDEN_FLAGS=(-A)
 	fi
-	directory_change
+	get_current_dir_content
 	sync_search_files
 	update_search
 }
