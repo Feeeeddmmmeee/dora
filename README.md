@@ -51,6 +51,7 @@ r           : run the :rename command, rename marked file
 
 # MISC
 .           : toggle the visibility of hidden files
+q           : quit the program
 
 ```
 
