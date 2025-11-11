@@ -9,6 +9,7 @@ Dora is a simple terminal file explorer written in bash.
 - [ ] grep mode removing empty entries from the file list just like search
 - [ ] config file
 - [ ] fixing lag when scrolling through the file list
+- [ ] image preview
 
 ## :exclamation: Project requirements
 - [x] Filesystem navigation
