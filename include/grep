@@ -7,7 +7,6 @@ GREP_PATTERN=""
 
 update_grep_result()
 {
-	GREP_PATTERN="$CURRENT_INPUT"
 	local selected="$CURRENT_DIR${CURRENT_DIR_CONTENT[$SELECTED]}"
 	local content=
 

@@ -24,9 +24,7 @@ sync_search_files()
 update_search()
 {
 	CURRENT_DIR_CONTENT=()
-	for item in "${ORIGINAL_FILES[@]}"; do
-		[[ $item == *"$SEARCH_QUERY"* ]] && CURRENT_DIR_CONTENT+=("$item")
-	done
+	CURRENT_DIR_CONTENT=($(printf "%s\n" "${ORIGINAL_FILES[@]}" | grep "$SEARCH_QUERY"))
 
 	search_change
 }
