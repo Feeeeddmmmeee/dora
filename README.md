@@ -11,6 +11,9 @@ Dora is a feature-rich bash TUI file explorer, originally written as a universit
 
 ## :sparkles: Features
 
+### Live search with partial regex support
+![search](https://github.com/user-attachments/assets/d492d699-0762-4b9f-a183-2ee1f0147ea2)
+
 ## :rocket: Installation
 For the time being just clone the repository and add it to your path.
 
