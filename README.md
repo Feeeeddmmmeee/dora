@@ -18,3 +18,9 @@ Dora is a simple terminal file explorer written in bash.
 - [ ] Export results to JSON/CSV
 - [x] Colors:3
 - [ ] Logging user actions
+
+<br>
+
+<p align="center">
+    <img src="https://github.com/catppuccin/catppuccin/blob/main/assets/footers/gray0_ctp_on_line.png?raw=true"
+</p>
