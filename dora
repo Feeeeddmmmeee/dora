@@ -46,7 +46,7 @@ add_character()
 	CURRENT_INPUT+="$1"
 	render_input
 
-	case  "$MODE" in
+	case "$MODE" in
 		search) 
 			SEARCH_QUERY="$CURRENT_INPUT"
 			update_search;;
@@ -62,14 +62,14 @@ add_character()
 remove_character()
 {
 	if [ -z "$CURRENT_INPUT" ]; then
-		reset_mode
+		exit_input
 		return
 	fi
 
 	CURRENT_INPUT="${CURRENT_INPUT:0:-1}"
 	render_input
 
-	case  "$MODE" in
+	case "$MODE" in
 		search) 
 			SEARCH_QUERY="$CURRENT_INPUT"
 			update_search;;
