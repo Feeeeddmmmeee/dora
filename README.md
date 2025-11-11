@@ -81,6 +81,9 @@ When in COMMAND mode press up/down to cycle through command history
 - [ ] config file
 - [ ] fixing lag when scrolling through the file list
 - [ ] image preview
+- [ ] opening files
+- [ ] file preview coloring
+- [ ] better binary recognition
 - [ ] (?) AUR package
 
 ## :exclamation: Project requirements
