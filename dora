@@ -232,6 +232,9 @@ main()
 					'[B' | j) file_list_move_selection 1;;
 					'CTRL-U') file_list_move_selection $(((ROWS - 3)/-2));;
 					'CTRL-D') file_list_move_selection $(((ROWS - 3)/2));;
+					'g') file_list_move_selection "$((-1*${#CURRENT_DIR_CONTENT[@]}))";;
+					'G') file_list_move_selection "${#CURRENT_DIR_CONTENT[@]}";;
+					'~') file_list_open "$HOME";;
 					'[C' | l) file_list_open;;
 					'[D' | h | -) file_list_open ..;;
 					'RETURN') file_list_open;;
@@ -241,8 +244,11 @@ main()
 					'c') edit_marked copy "$CURRENT_DIR";;
 					'm') edit_marked move "$CURRENT_DIR";;
 					'd') edit_marked delete;;
+					'x') edit_marked toggle_executable;;
 					't') start_command "create ";;
+					'r') start_command "rename $MARKED";;
 					'?') enter_grep_mode;;
+					'.') command_hidden;;
 					q) exit;;
 				esac;;
 			command)
