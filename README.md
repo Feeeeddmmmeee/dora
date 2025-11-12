@@ -81,7 +81,6 @@ When in COMMAND mode press up/down to cycle through command history
 
 ## :hammer: TODO
 - [ ] minimal terminal size
-- [ ] grep mode removing empty entries from the file list just like search
 - [ ] config file
 - [ ] fixing lag when scrolling through the file list
 - [ ] image preview
