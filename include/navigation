@@ -43,6 +43,7 @@ directory_change()
 search_change()
 {
 	SELECTED=0
+  FILE_LIST_OFFSET=0
 	escape hide_cursor
 	clear_file_list
 	render_entire_file_list

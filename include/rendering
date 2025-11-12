@@ -203,10 +203,8 @@ render_file_list_entry()
 
 render_entire_file_list()
 {
-	local iter=0
-	for element in "${CURRENT_DIR_CONTENT[@]}"; do
-		render_file_list_entry $iter
-		((iter+=1))
+  for (( i=$FILE_LIST_OFFSET; i<=$(($FILE_LIST_OFFSET+$ROWS-3)); ++i )); do
+		render_file_list_entry $i
 	done
 }
 
