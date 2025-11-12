@@ -14,11 +14,11 @@ get_term_size()
 format_bytes()
 {
 	local bytes=$1
-	local units=("B" "KiB" "MiB" "GiB" "TiB")
+	local units=("" "K" "M" "G" "T" "P")
 	local i=0
 
-	while (( bytes >= 1024 && i < ${#units[@]} - 1 )); do
-		bytes=$(( bytes / 1024 ))
+	while (( bytes >= 1000 && i < ${#units[@]} - 1 )); do
+		bytes=$(( bytes / 1000 ))
 		((i++))
 	done
 
@@ -85,7 +85,7 @@ justify_to_term_width()
 
 render_bottom()
 {
-	local file_info spaces selected dir_info index
+	local file_info spaces selected dir_info index dir_size
 
 	escape set_cursor "$((ROWS - 1))" 0
 	if (( ${#CURRENT_DIR_CONTENT[@]} )); then
@@ -95,12 +95,14 @@ render_bottom()
 		file_info="$file_info$(format_bytes "$(stat -c "%s" "$selected")") "
 		file_info="$file_info$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M') $(escape reset)"
 		index="($((SELECTED + 1))/${#CURRENT_DIR_CONTENT[@]})"
-		else
+    dir_size="$(du -sSh --apparent-size | awk -F'\t' '{print $1}')"
+	else
 			file_info="$(escape reset)"
 			index="(0/0)"
+    dir_size="$(du -sSh --apparent-size | awk -F'\t' '{print $1}')"
 	fi
 
-	dir_info="$(escape blue_color)$(escape invert_color)$index"
+	dir_info="$(escape blue_color)$(escape invert_color)$index $dir_size"
 
 	justify_to_term_width "$dir_info" "$file_info"
 }

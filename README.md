@@ -82,13 +82,13 @@ When in COMMAND mode press up/down to cycle through command history
 ## :hammer: TODO
 - [x] fixing lag when scrolling through the file list
 - [x] better binary recognition
-- [ ] minimal terminal size
 - [ ] config file
 - [ ] image preview
 - [ ] opening files
 - [ ] file preview coloring
 - [ ] list more features in the readme
 - [ ] (?) AUR package
+- [ ] ~~minimal terminal size~~
 
 ## :exclamation: Project requirements
 - [x] Filesystem navigation
