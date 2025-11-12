@@ -80,9 +80,9 @@ When in COMMAND mode press up/down to cycle through command history
 ```
 
 ## :hammer: TODO
+- [x] fixing lag when scrolling through the file list
 - [ ] minimal terminal size
 - [ ] config file
-- [ ] fixing lag when scrolling through the file list
 - [ ] image preview
 - [ ] opening files
 - [ ] file preview coloring
