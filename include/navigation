@@ -123,7 +123,7 @@ update_selected_content()
 		files="$(ls "${LS_HIDDEN_FLAGS[@]}" "${LS_SORTING_FLAGS[@]}" "$selected")"
 		content=$(parse_file_list "$(head -"$height" <<< "$files")" "$selected")
 	# Don't try to render binary files
-	elif file --mime-encoding "$selected" | grep -q binary; then
+	elif file -L -b --mime "$selected" | grep -q binary; then
 		content="Can't preview binary file!"
 	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
 	elif [ -f "$selected" ]; then
