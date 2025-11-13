@@ -24,7 +24,7 @@ sync_search_files()
 update_search()
 {
 	CURRENT_DIR_CONTENT=()
-	CURRENT_DIR_CONTENT=($(printf "%s\n" "${ORIGINAL_FILES[@]}" | grep "$SEARCH_QUERY"))
+	CURRENT_DIR_CONTENT=($(printf "%s\n" "${ORIGINAL_FILES[@]}" | grep -P "$SEARCH_QUERY"))
 
 	search_change
 }
