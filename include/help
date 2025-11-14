@@ -17,6 +17,52 @@ Options:
 Arguments:
   PATH             Start the file manager in the specified directory
                    Example: $SCRIPT_NAME ./some/directory
+
+Commands:
+	File operations:
+		:mark          Mark selected file
+		:copy          Copy marked file to active dir
+		:delete        Delete marked file
+		:move          Move marked file to active dir and mark the moved file
+		:rename ARGS   Rename marked file to the first argument
+		:touch ARGS    Create files passed as arguments, supports paths and can create nested directories
+
+	Other:
+		:sort type|size|name|mod   Set the sorting mode
+		:hidden [true|false]       Set the visibility of hidden files, leave empty to toggle
+		:quit                      Exit the program
+
+Keybinds:
+	Navigation:
+		j / down       Scroll down
+		k / up         Scroll up
+		h / left       Go to parent dir
+		l / right      Open selected file
+		CTRL-U         Scroll half a page up
+		CTRL-D         Scroll half a page down
+		g              Scroll all the way up
+		G              Scroll all the way down
+		~              Open $HOME
+		-              Go to parent dir
+		ENTER          Open selected file
+
+	File operations:
+		SPACE          Mark selected file
+		t              Run the :touch command, create a new file
+		d              Delete marked file
+		c              Copy marked file to active dir
+		m              Move marked file to active dir and mark the moved file
+		x              Toggle execute permission of the marked file
+		r              Run the :rename command, rename marked file
+
+	Modes:
+		:              Enter COMMAND mode
+		/              Enter SEARCH mode
+		?              Enter GREP mode
+
+	Other:
+		.              Toggle the visibility of hidden files
+		q              Quit the program
 EOF
 }
 
