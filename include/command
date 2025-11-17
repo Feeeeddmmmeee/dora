@@ -213,6 +213,15 @@ create_file_dir()
 	log_debug "Created $path"
 }
 
+get_dir_size()
+{
+	local dir_size
+	set_input_message "Fetching directory size..."
+	reset_mode
+    dir_size="$(du -sSh --apparent-size | awk -F'\t' '{print $1}')"
+	set_input_message "$dir_size"
+}
+
 execute_command()
 {
 	local tokens=()
@@ -228,6 +237,7 @@ execute_command()
 		create|touch) create_command "${tokens[@]:1}";;
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) exit 0;;
+		ds|dirsize) get_dir_size "$CURRENT_DIR";;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
 	esac
 	COMMAND_HISTORY+=("$CURRENT_COMMAND")
