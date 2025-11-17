@@ -1,10 +1,22 @@
 #!/usr/bin/env bash
 
-source include/help
-source include/grep
-source include/navigation
-source include/command
-source include/search
+# Different include path for local developement and final installation
+LOCAL_INCLUDE="include"
+SYSTEM_INCLUDE="/usr/share/dora"
+
+if [ -d "$SYSTEM_INCLUDE" ]; then
+	INCLUDE_DIR="$SYSTEM_INCLUDE"
+else
+	INCLUDE_DIR="$LOCAL_INCLUDE"
+fi
+
+source "$INCLUDE_DIR/logging"
+source "$INCLUDE_DIR/rendering"
+source "$INCLUDE_DIR/help"
+source "$INCLUDE_DIR/grep"
+source "$INCLUDE_DIR/navigation"
+source "$INCLUDE_DIR/command"
+source "$INCLUDE_DIR/search"
 
 # type, mod, name, size
 init_sorting "type"

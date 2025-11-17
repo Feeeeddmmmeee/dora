@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-source include/rendering
-
 MARKED=
 MARKED_DIR=
 

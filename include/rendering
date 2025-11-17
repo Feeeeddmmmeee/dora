@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-source include/logging
-
 ROWS=
 COLS=
 

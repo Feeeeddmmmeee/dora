@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-source include/rendering
-
 CURRENT_COMMAND=""
 CURRENT_MESSAGE=""
 COMMAND_HISTORY=()
