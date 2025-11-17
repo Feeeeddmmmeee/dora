@@ -15,7 +15,17 @@ Dora is a feature-rich bash TUI file explorer, originally written as a universit
 ![search](https://github.com/user-attachments/assets/d492d699-0762-4b9f-a183-2ee1f0147ea2)
 
 ## :rocket: Installation
-For the time being just clone the repository and add it to your path.
+Right now only installation through make is supported. Note that you don't have to install Dora to use it - just execute the ./dora script. To install Dora system-wide using make run:
+```sh
+git clone https://github.com/Feeeeddmmmeee/dora
+cd dora
+sudo make install
+```
+
+Then if you wish to uninstall Dora just run:
+```
+sudo make uninstall
+```
 
 ## :video_game: Usage
 ### Keybinds
