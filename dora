@@ -44,7 +44,9 @@ set_input_message()
 add_character()
 {
 	CURRENT_INPUT+="$1"
+	escape hide_cursor
 	render_input
+	escape show_cursor
 
 	case "$MODE" in
 		search) 
@@ -67,7 +69,9 @@ remove_character()
 	fi
 
 	CURRENT_INPUT="${CURRENT_INPUT:0:-1}"
+	escape hide_cursor
 	render_input
+	escape show_cursor
 
 	case "$MODE" in
 		search) 
