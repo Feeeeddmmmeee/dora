@@ -13,6 +13,8 @@ LS_SORTING_FLAGS=()
 LS_HIDDEN_FLAGS=(-A)
 SHOW_HIDDEN=1
 
+FILE_EDITORS=("$EDITOR" nvim vim vi nano)
+
 # Rerenders components which depend on the currently active file
 # (except the dir content as its handled separately)
 file_change()
@@ -228,7 +230,31 @@ file_list_open()
 		FILE_LIST_OFFSET=0
 		directory_change
 	else
-		# TODO: open file with preferred editor
-		true
+		# Try to open binary files with xdg-open
+		if file -L -b --mime "$dest" | grep -q binary; then
+			if command -v xdg-open $> /dev/null; then
+				xdg-open "$dest" &
+			fi
+		# Else open it in the same terminal in a text editor
+		else
+			# Kill the keyboard input process
+			kill %%
+			# Other TUI programs often overwrite the stored terminal
+			escape restore_term
+
+			for cmd in "${FILE_EDITORS[@]}"; do
+				[[ -z "$cmd" ]] && continue
+				if command -v "$cmd" &>/dev/null; then
+					"$cmd" "$dest"
+					break
+				fi
+			done
+
+			# Restart keyboard input
+			handle_keyboard_input <&$fd2 &
+			escape save_term
+			escape hide_cursor
+			redraw
+		fi
 	fi
 }
