@@ -26,6 +26,13 @@ Then if you wish to uninstall Dora just run:
 ```
 sudo make uninstall
 ```
+## :inbox_tray: Dependencies
+### Required
+- `bash`
+- `coreutils`
+### Optional
+- `xdg-utils` (for opening non-text files with `xdg-open`)
+- `highlight` (for colorizing file previews)
 
 ## :video_game: Usage
 ### Keybinds
