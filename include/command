@@ -70,6 +70,42 @@ command_hidden()
 	reset_mode
 }
 
+command_line_wrap()
+{
+	local arg=$1
+
+	# If ran with no arguments toggle
+	if [ -z "$arg" ]; then
+		case "$HIGHLIGHT_LINE_WRAPPING" in
+			'1') 
+				set_input_message "Disabled line wrapping for file previews"
+				HIGHLIGHT_LINE_WRAPPING=0
+				;;
+			'0')
+				set_input_message "Enabled line wrapping for file previews"
+				HIGHLIGHT_LINE_WRAPPING=1
+				;;
+		esac
+		reset_mode
+		directory_change
+		return 0
+	fi
+
+	case "$arg" in
+		true|1|yes)
+			set_input_message "Disabled line wrapping for file previews"
+			HIGHLIGHT_LINE_WRAPPING=1
+			;;
+		false|0|no)
+			set_input_message "Enabled line wrapping for file previews"
+			HIGHLIGHT_LINE_WRAPPING=0
+			;;
+		*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
+	esac
+	reset_mode
+	directory_change
+}
+
 move_command_history()
 {
 	local history_size="${#COMMAND_HISTORY[@]}"
@@ -236,6 +272,7 @@ execute_command()
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) exit 0;;
 		ds|dirsize) get_dir_size "$CURRENT_DIR";;
+		lw|linewrap) command_line_wrap "${tokens[1]}";;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
 	esac
 	COMMAND_HISTORY+=("$CURRENT_COMMAND")
