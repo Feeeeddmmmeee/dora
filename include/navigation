@@ -14,6 +14,7 @@ LS_HIDDEN_FLAGS=(-A)
 SHOW_HIDDEN=1
 
 FILE_EDITORS=("$EDITOR" nvim vim vi nano)
+HIGHLIGHT_LINE_WRAPPING=0
 
 # Rerenders components which depend on the currently active file
 # (except the dir content as its handled separately)
@@ -128,7 +129,12 @@ update_selected_content()
 	elif [ -f "$selected" ]; then
 		# try to use highlight for preview coloring, if present
 		if command -v highlight; then
-			content="$(highlight -O ansi --line-range=1-"$height" $selected)"
+			case "$HIGHLIGHT_LINE_WRAPPING" in
+				true|1|y|yes)
+					content="$(head -"$height" <<< $(highlight -O ansi --line-length="$((COLS/2))" -W --line-range=1-"$height" $selected))";;
+				*)
+					content="$(highlight -O ansi --line-range=1-"$height" $selected)";;
+			esac
 		else
 			# try to avoid null bytes which apparently mess up strings and most importantly send a random warning
 			content="$(head -"$height" "$selected" | tr '\0' '\n')"
