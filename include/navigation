@@ -258,3 +258,20 @@ file_list_open()
 		fi
 	fi
 }
+
+open_terminal_in_dir() 
+{
+  kill %%
+		
+  escape clear
+  escape set_cursor
+
+  local current_dir="$CURRENT_DIR"
+  cd "$1"
+  "$SHELL"
+  cd "$current_dir"
+
+  handle_keyboard_input <&$fd2 &
+  escape hide_cursor
+  redraw
+}
