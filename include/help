@@ -30,6 +30,7 @@ Commands:
 	Other:
 		:sort type|size|name|mod   Set the sorting mode
 		:hidden [true|false]       Set the visibility of hidden files, leave empty to toggle
+		:linewrap [true|false]     Set the whether file preview should wrap lines, empty to toggle
 		:quit                      Exit the program
 
 Keybinds:

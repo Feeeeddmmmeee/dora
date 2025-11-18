@@ -87,6 +87,7 @@ When in COMMAND mode press up/down to cycle through command history
 
 :sort type|size|name|mod : set the sorting mode
 :hidden [true|false]     : set the visibility of hidden files, leave empty to toggle
+:linewrap [true|false]   : set the whether file preview should wrap lines, empty to toggle
 :quit                    : exit the program
 ```
 
