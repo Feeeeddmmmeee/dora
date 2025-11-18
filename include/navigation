@@ -125,12 +125,17 @@ update_selected_content()
 	# Don't try to render binary files
 	elif file -L -b --mime "$selected" | grep -q binary; then
 		content="Can't preview binary file!"
-	# tr to avoid null bytes which apparently mess up strings and most importantly send a random warning
 	elif [ -f "$selected" ]; then
-		content="$(head -"$height" "$selected" | tr '\0' '\n')"
+		# try to use highlight for preview coloring, if present
+		if command -v highlight; then
+			content="$(highlight -O ansi --line-range=1-"$height" $selected)"
+		else
+			# try to avoid null bytes which apparently mess up strings and most importantly send a random warning
+			content="$(head -"$height" "$selected" | tr '\0' '\n')"
+		fi
 	fi
 
-	SELECTED_CONTENT=$content
+	SELECTED_CONTENT="$content"
 }
 
 update_right_panel_data()
