@@ -128,7 +128,7 @@ update_selected_content()
 		content="Can't preview binary file!"
 	elif [ -f "$selected" ]; then
 		# try to use highlight for preview coloring, if present
-		if command -v highlight; then
+		if command -v highlight &> /dev/null; then
 			case "$HIGHLIGHT_LINE_WRAPPING" in
 				true|1|y|yes)
 					content="$(head -"$height" <<< $(highlight -O ansi --line-length="$((COLS/2))" -W --line-range=1-"$height" $selected))";;
