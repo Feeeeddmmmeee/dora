@@ -5,8 +5,10 @@ COLS=
 
 get_term_size()
 {
-	ROWS=$(tput lines)
-	COLS=$(tput cols)
+	geometry=$(stty size)
+
+	ROWS=$(echo $geometry | cut -d' ' -f1)
+	COLS=$(echo $geometry | cut -d' ' -f2)
 }
 
 format_bytes()
