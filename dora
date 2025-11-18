@@ -216,7 +216,6 @@ main()
 	PIPE=/tmp/dora_keyboard_input_$$
 	mkfifo $PIPE
 	exec {fd}<>$PIPE
-	exec 2>"$LOG_FILE"
 
 	exec {fd2}</dev/tty
 	handle_keyboard_input <&$fd2 &
@@ -261,6 +260,7 @@ main()
 					'r') start_command "rename $MARKED";;
 					'?') enter_grep_mode;;
 					'.') command_hidden;;
+          'o') open_terminal_in_dir "$CURRENT_DIR";;
 					q) exit;;
 				esac;;
 			command)

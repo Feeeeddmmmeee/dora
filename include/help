@@ -62,6 +62,7 @@ Keybinds:
 
 	Other:
 		.              Toggle the visibility of hidden files
+		o              Open a new $SHELL instance in the current directory
 		q              Quit the program
 EOF
 }

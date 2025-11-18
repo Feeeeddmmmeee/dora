@@ -64,6 +64,7 @@ r           : run the :rename command, rename marked file
 
 # MISC
 .           : toggle the visibility of hidden files
+o           : open a new $SHELL instance in the current directory
 q           : quit the program
 
 ```
