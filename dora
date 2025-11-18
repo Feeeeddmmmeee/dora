@@ -117,8 +117,6 @@ cleanup()
 	escape restore_term
 	escape show_cursor
 	escape reset
-	tput rmcup
-	tput smam
 	rm $PIPE
 	kill %% 2>/dev/null
 }
@@ -200,8 +198,6 @@ main()
 		esac
 	done
 
-	tput smcup
-	tput rmam
 	# Prepare terminal for rendering
 	trap cleanup exit
 
