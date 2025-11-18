@@ -94,10 +94,10 @@ When in COMMAND mode press up/down to cycle through command history
 - [x] better binary recognition
 - [x] better --help
 - [x] opening files
+- [x] file preview coloring
 - [ ] fixing lag when scrolling through the file list
 - [ ] config file
 - [ ] image preview
-- [ ] file preview coloring
 - [ ] list more features in the readme
 - [ ] (?) AUR package
 - [ ] ~~minimal terminal size~~
