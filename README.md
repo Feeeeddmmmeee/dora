@@ -33,6 +33,7 @@ sudo make uninstall
 ### Optional
 - `xdg-utils` (for opening non-text files with `xdg-open`)
 - `highlight` (for colorizing file previews)
+- `nvim`, `vim`, `vi`, `nano` (for opening files, can also use the `$EDITOR` variable)
 
 ## :video_game: Usage
 ### Keybinds
