@@ -1,9 +1,9 @@
 <div align="center">
 <h1>Dora :3</h1>
 
-![GitHub License](https://img.shields.io/github/license/Feeeeddmmmeee/dora-explorer?style=for-the-badge&labelColor=%230f0f10&color=%23993364)
-![GitHub last commit](https://img.shields.io/github/last-commit/Feeeeddmmmeee/dora-explorer?style=for-the-badge&labelColor=%230f0f10&color=%23993364)
-![GitHub Created At](https://img.shields.io/github/created-at/Feeeeddmmmeee/dora-explorer?style=for-the-badge&labelColor=%230f0f10&color=%23993364)
+![GitHub License](https://img.shields.io/github/license/Feeeeddmmmeee/dora?style=for-the-badge&labelColor=%230f0f10&color=%23993364)
+![GitHub last commit](https://img.shields.io/github/last-commit/Feeeeddmmmeee/dora?style=for-the-badge&labelColor=%230f0f10&color=%23993364)
+![GitHub Created At](https://img.shields.io/github/created-at/Feeeeddmmmeee/dora?style=for-the-badge&labelColor=%230f0f10&color=%23993364)
 
 Dora is a feature-rich bash TUI file explorer, originally written as a university project.
     
