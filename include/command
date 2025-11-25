@@ -6,13 +6,6 @@ COMMAND_HISTORY=()
 COMMAND_HISTORY_POSITION="1"
 COMMAND_DRAFT=""
 
-set_command_line_message()
-{
-	CURRENT_MESSAGE="$1"
-	log_debug "Setting message: \"$CURRENT_MESSAGE\""
-	render_command
-}
-
 enter_command_mode()
 {
 	log_debug "Entering COMMAND mode"

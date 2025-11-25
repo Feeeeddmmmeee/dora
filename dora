@@ -222,7 +222,7 @@ main()
 
 	# Handle events
 	while true; do
-		IFS="" read -r -t 0.1 input <&$fd
+		IFS="" read -r -t 0.01 input <&$fd
 
 		local old_rows=$ROWS
 		local old_cols=$COLS
