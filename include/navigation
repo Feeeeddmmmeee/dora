@@ -277,6 +277,7 @@ open_terminal_in_dir()
 		
   escape clear
   escape set_cursor
+  escape show_cursor
 
   local current_dir="$CURRENT_DIR"
   cd "$1"
