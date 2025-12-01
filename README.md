@@ -1,9 +1,10 @@
 <div align="center">
 <h1>Dora :3</h1>
 
+![AUR Version](https://img.shields.io/aur/version/dora-git?style=for-the-badge&logo=archlinux&logoColor=%2366668D&labelColor=%23230f0f10&color=%2366668D)
 ![GitHub License](https://img.shields.io/github/license/Feeeeddmmmeee/dora?style=for-the-badge&labelColor=%230f0f10&color=%23993364)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Feeeeddmmmeee/dora?style=for-the-badge&labelColor=%230f0f10&color=%23993364)
-![GitHub Created At](https://img.shields.io/github/created-at/Feeeeddmmmeee/dora?style=for-the-badge&labelColor=%230f0f10&color=%23993364)
+![GitHub Created At](https://img.shields.io/github/created-at/Feeeeddmmmeee/dora?style=for-the-badge&labelColor=%230f0f10&color=%23993364)    
 
 Dora is a feature-rich bash TUI file explorer, originally written as a university project.
     
@@ -15,7 +16,14 @@ Dora is a feature-rich bash TUI file explorer, originally written as a universit
 ![search](https://github.com/user-attachments/assets/d492d699-0762-4b9f-a183-2ee1f0147ea2)
 
 ## :rocket: Installation
-Right now only installation through make is supported. Note that you don't have to install Dora to use it - just execute the ./dora script. To install Dora system-wide using make run:
+Note that you don't have to install Dora to use it - just execute the ./dora script.
+### Arch Linux
+Dora is available in the AUR so you can install it using your AUR helper of choice:
+```sh
+yay -S dora-git
+```
+### Other Systems
+To install Dora system-wide using make run: 
 ```sh
 git clone https://github.com/Feeeeddmmmeee/dora
 cd dora
