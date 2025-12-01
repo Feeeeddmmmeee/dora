@@ -2,7 +2,7 @@
 
 # Different include path for local developement and final installation
 LOCAL_INCLUDE="include"
-SYSTEM_INCLUDE="/usr/share/dora"
+SYSTEM_INCLUDE="/usr/lib/dora"
 
 if [ -d "$SYSTEM_INCLUDE" ]; then
 	INCLUDE_DIR="$SYSTEM_INCLUDE"
