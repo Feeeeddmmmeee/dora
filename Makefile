@@ -1,7 +1,7 @@
 PREFIX ?= /usr
 
 BINDIR := $(PREFIX)/bin
-SHAREDIR := $(PREFIX)/share/dora
+SHAREDIR := $(PREFIX)/lib/dora
 
 all:
 	@echo Run \'make install\' to install
