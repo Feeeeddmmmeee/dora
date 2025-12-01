@@ -245,7 +245,7 @@ get_dir_size()
 	local dir_size
 	set_input_message "Fetching directory size..."
 	reset_mode
-    dir_size="$(du -sSh --apparent-size | awk -F'\t' '{print $1}')"
+    dir_size="$(du -sSh --apparent-size | cut -f1)"
 	set_input_message "$dir_size"
 }
 

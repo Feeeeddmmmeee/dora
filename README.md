@@ -30,6 +30,8 @@ sudo make uninstall
 ### Required
 - `bash`
 - `coreutils`
+- `grep` (filtering results with regex)
+- `file` (checking file types)
 ### Optional
 - `xdg-utils` (for opening non-text files with `xdg-open`)
 - `highlight` (for colorizing file previews)

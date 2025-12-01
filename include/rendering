@@ -96,11 +96,9 @@ render_bottom()
 		file_info="$file_info$(format_bytes "$(stat -c "%s" "$selected")") "
 		file_info="$file_info$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M') $(escape reset)"
 		index="($((SELECTED + 1))/${#CURRENT_DIR_CONTENT[@]})"
-    # dir_size="$(du -sSh | awk -F'\t' '{print $1}')"
 	else
 			file_info="$(escape reset)"
 			index="(0/0)"
-    # dir_size="$(du -sSh | awk -F'\t' '{print $1}')"
 	fi
 
 	dir_info="$(escape blue_color)$(escape invert_color)$index $dir_size"
