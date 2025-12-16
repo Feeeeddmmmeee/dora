@@ -274,7 +274,7 @@ execute_command()
 		rename) edit_marked rename "${tokens[1]}";;
 		create|touch) create_command "${tokens[@]:1}";;
 		hidden) command_hidden "${tokens[1]}";;
-		q|quit) exit 0;;
+		q|quit) log_debug "Exiting dora..." exit 0;;
 		ds|dirsize) get_dir_size "$CURRENT_DIR";;
 		lw|linewrap) command_line_wrap "${tokens[1]}";;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
