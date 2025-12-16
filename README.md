@@ -114,11 +114,11 @@ When in COMMAND mode press up/down to cycle through command history
 - [x] better --help
 - [x] opening files
 - [x] file preview coloring
+- [x] AUR package
 - [ ] fixing lag when scrolling through the file list
 - [ ] config file
 - [ ] image preview
 - [ ] list more features in the readme
-- [ ] (?) AUR package
 - [ ] ~~minimal terminal size~~
 
 ## :exclamation: Project requirements
