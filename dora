@@ -220,6 +220,7 @@ main()
 	exec {fd2}</dev/tty
 	handle_keyboard_input <&$fd2 &
 
+	log_debug Entering event loop
 	# Handle events
 	while true; do
 		IFS="" read -r -t 0.01 input <&$fd
@@ -229,6 +230,7 @@ main()
 		get_term_size
 
 		if [[ "$old_rows" -ne "$ROWS" || "$old_cols" -ne "$COLS" ]]; then
+			log_debug Detected terminal resize. Rerendering...
 			redraw
 		fi
 
