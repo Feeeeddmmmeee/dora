@@ -257,12 +257,14 @@ file_list_open()
 			for cmd in "${FILE_EDITORS[@]}"; do
 				[[ -z "$cmd" ]] && continue
 				if command -v "$cmd" &>/dev/null; then
+					log_debug "Opening $dest with $cmd"
 					"$cmd" "$dest"
 					break
 				fi
 			done
 
 			# Restart keyboard input
+			log_debug "Restarting the keyboard input process"
 			handle_keyboard_input <&$fd2 &
 			escape save_term
 			escape hide_cursor
@@ -273,18 +275,20 @@ file_list_open()
 
 open_terminal_in_dir() 
 {
-  kill %%
-		
-  escape clear
-  escape set_cursor
-  escape show_cursor
+	kill %%
 
-  local current_dir="$CURRENT_DIR"
-  cd "$1"
-  "$SHELL"
-  cd "$current_dir"
+	escape clear
+	escape set_cursor
+	escape show_cursor
 
-  handle_keyboard_input <&$fd2 &
-  escape hide_cursor
-  redraw
+	log_debug "Opening $current_dir with $SHELL"
+	local current_dir="$CURRENT_DIR"
+	cd "$1"
+	"$SHELL"
+	cd "$current_dir"
+
+	log_debug "Restarting the keyboard input process"
+	handle_keyboard_input <&$fd2 &
+	escape hide_cursor
+	redraw
 }
