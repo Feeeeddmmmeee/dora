@@ -4,10 +4,10 @@
 LOCAL_INCLUDE="include"
 SYSTEM_INCLUDE="/usr/lib/dora"
 
-if [ -d "$SYSTEM_INCLUDE" ]; then
-	INCLUDE_DIR="$SYSTEM_INCLUDE"
-else
+if [ -d "$LOCAL_INCLUDE" ]; then
 	INCLUDE_DIR="$LOCAL_INCLUDE"
+else
+	INCLUDE_DIR="$SYSTEM_INCLUDE"
 fi
 
 source "$INCLUDE_DIR/logging"

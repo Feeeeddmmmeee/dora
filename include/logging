@@ -31,5 +31,5 @@ log_error() { [[ $LOG_LEVEL -le $LOG_ERROR ]] && _log $LOG_ERROR "$*"; }
 
 show_logs()
 {
-	tail -f "$LOG_FILE"
+	tail -f "$LOG_FILE" -c 0 -q
 }
