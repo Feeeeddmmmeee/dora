@@ -127,7 +127,7 @@ When in COMMAND mode press up/down to cycle through command history
 - [ ] Current directory statistics - file count, combined size, biggest file
 - [ ] Export results to JSON/CSV
 - [x] Colors:3
-- [ ] Logging user actions
+- [x] Logging user actions
 
 <br>
 
