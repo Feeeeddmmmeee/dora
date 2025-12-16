@@ -230,6 +230,7 @@ main()
 		get_term_size
 
 		if [[ "$old_rows" -ne "$ROWS" || "$old_cols" -ne "$COLS" ]]; then
+			log_debug Detected terminal resize. Rerendering...
 			redraw
 		fi
 

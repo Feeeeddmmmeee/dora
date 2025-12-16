@@ -41,9 +41,11 @@ command_hidden()
 		case "$SHOW_HIDDEN" in
 			'1') 
 				set_input_message "Disabled showing .hidden files"
+				log_debug "Disabled showing .hidden files"
 				set_hidden 0;;
 			'0')
 				set_input_message "Enabled showing .hidden files"
+				log_debug "Enabled showing .hidden files"
 				set_hidden 1;;
 		esac
 		return 0
@@ -52,10 +54,12 @@ command_hidden()
 	case "$arg" in
 		true|1|yes)
 			set_input_message "Enabled showing .hidden files"
+			log_debug "Enabled showing .hidden files"
 			set_hidden 1
 			;;
 		false|0|no)
 			set_input_message "Disabled showing .hidden files"
+			log_debug "Disabled showing .hidden files"
 			set_hidden 0
 			;;
 		*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
@@ -72,10 +76,12 @@ command_line_wrap()
 		case "$HIGHLIGHT_LINE_WRAPPING" in
 			'1') 
 				set_input_message "Disabled line wrapping for file previews"
+				log_debug "Disabled line wrapping for file previews"
 				HIGHLIGHT_LINE_WRAPPING=0
 				;;
 			'0')
 				set_input_message "Enabled line wrapping for file previews"
+				log_debug "Enabled line wrapping for file previews"
 				HIGHLIGHT_LINE_WRAPPING=1
 				;;
 		esac
@@ -87,10 +93,12 @@ command_line_wrap()
 	case "$arg" in
 		true|1|yes)
 			set_input_message "Disabled line wrapping for file previews"
+			log_debug "Disabled line wrapping for file previews"
 			HIGHLIGHT_LINE_WRAPPING=1
 			;;
 		false|0|no)
 			set_input_message "Enabled line wrapping for file previews"
+			log_debug "Enabled line wrapping for file previews"
 			HIGHLIGHT_LINE_WRAPPING=0
 			;;
 		*) set_input_message "$(escape red_color)$1 is not a supported boolean alias$(escape default_color)";;
@@ -183,9 +191,11 @@ edit_marked()
 			if [ -x "$file" ]; then
 				chmod -x "$file"
 				set_input_message "Removed execute permission from $MARKED"
+				log_debug "Removed execute permission from $MARKED_DIR$MARKED"
 			else
 				chmod +x "$file"
 				set_input_message "Added execute permission to $MARKED"
+				log_debug "Added execute permission to $MARKED_DIR$MARKED"
 			fi
 			directory_change
 			;;
@@ -245,6 +255,7 @@ get_dir_size()
 	local dir_size
 	set_input_message "Fetching directory size..."
 	reset_mode
+	log_debug "Fetching $PWD directory size"
     dir_size="$(du -sSh --apparent-size | cut -f1)"
 	set_input_message "$dir_size"
 }
