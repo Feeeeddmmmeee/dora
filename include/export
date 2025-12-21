@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+EXPORT_DIR="$HOME/.local/state/dora/export"
+
+export_files_to_csv() {
+	local filename
+	local exportfile="$EXPORT_DIR/$(date +%Y-%m-%dT%H:%M:%S%Z)_files_export.csv"
+	touch "$exportfile"
+	for filename in "${CURRENT_DIR_CONTENT[@]}"; do
+		printf "$filename;\n" >> $exportfile
+	done
+}
+
+export_content_to_txt() {
+	local filename
+	local exportfile="$EXPORT_DIR/$(date +%Y-%m-%dT%H:%M:%S%Z)_grep_export.txt"
+	touch "$exportfile"
+	printf "$GREP_RESULT" >> $exportfile
+}

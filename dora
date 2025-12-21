@@ -17,6 +17,7 @@ source "$INCLUDE_DIR/grep"
 source "$INCLUDE_DIR/navigation"
 source "$INCLUDE_DIR/command"
 source "$INCLUDE_DIR/search"
+source "$INCLUDE_DIR/export"
 
 # type, mod, name, size
 init_sorting "type"
@@ -176,6 +177,7 @@ main()
 {
 	# Init logging
 	mkdir -p "$LOG_DIR" || fatal "Failed to init logging directory"
+	mkdir -p "$EXPORT_DIR" || fatal "Failed to init export directory"
 
 	# Parse command line options
 	ARGS=()

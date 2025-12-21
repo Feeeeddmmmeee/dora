@@ -9,9 +9,9 @@ update_grep_result()
 	local content=
 
 	if [ -d "$selected" ]; then
-		content="$(grep -PIr -m 200 "$GREP_PATTERN" "$selected" | tr '\0' '\n' 2>/dev/null)"
+		content="$(grep -PIr -m 200 "$GREP_PATTERN" "$selected" 2>/dev/null | tr '\0' '\n' 2>/dev/null)"
 	elif [ -f "$selected" ]; then
-		content="$(grep -PI -m 200 "$GREP_PATTERN" "$selected" | tr '\0' '\n' 2>/dev/null)"
+		content="$(grep -PI -m 200 "$GREP_PATTERN" "$selected" 2>/dev/null | tr '\0' '\n' 2>/dev/null)"
 	fi
 
 	GREP_RESULT="$content"
