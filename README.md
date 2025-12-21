@@ -123,7 +123,7 @@ When in COMMAND mode press up/down to cycle through command history
 
 ## :exclamation: Project requirements
 - [x] Filesystem navigation
-- [ ] Finding files by name, type, size, date
+- [x] Finding files by name, type, size, date
 - [ ] Current directory statistics - file count, combined size, biggest file
 - [x] Export results to JSON/CSV
 - [x] Colors:3

@@ -62,6 +62,8 @@ Keybinds:
 		:              Enter COMMAND mode
 		/              Enter SEARCH mode
 		?              Enter GREP mode
+		$              Enter SEARCH SIZE mode (lets you specify the minimal size of a file)
+		%              Enter SEARCH DATE mode (lets you specify the minimal modification date of a file)
 
 	Other:
 		.              Toggle the visibility of hidden files

@@ -23,7 +23,7 @@ source "$INCLUDE_DIR/export"
 init_sorting "type"
 PIPE=
 
-# normal, command, search, grep
+# normal, command, search, search-date, search-size, grep
 MODE="normal" 
 CURRENT_INPUT=""
 CURRENT_MESSAGE=""
@@ -42,7 +42,7 @@ execute_input()
 {
 	case "$MODE" in
 		command) execute_command;;
-		search) reset_mode;;
+		search|search-size|search-date) reset_mode;;
 		grep) reset_mode;;
 	esac
 }
@@ -64,6 +64,12 @@ add_character()
 	case "$MODE" in
 		search) 
 			SEARCH_QUERY="$CURRENT_INPUT"
+			update_search;;
+		search-date) 
+			DATE_QUERY="$CURRENT_INPUT"
+			update_search;;
+		search-size) 
+			SIZE_QUERY="$CURRENT_INPUT"
 			update_search;;
 		grep)
 			GREP_PATTERN="$CURRENT_INPUT"
@@ -89,6 +95,12 @@ remove_character()
 	case "$MODE" in
 		search) 
 			SEARCH_QUERY="$CURRENT_INPUT"
+			update_search;;
+		search-date) 
+			DATE_QUERY="$CURRENT_INPUT"
+			update_search;;
+		search-size) 
+			SIZE_QUERY="$CURRENT_INPUT"
 			update_search;;
 		grep)
 			GREP_PATTERN="$CURRENT_INPUT"
@@ -255,6 +267,8 @@ main()
 					'RETURN') file_list_open;;
 					':') enter_command_mode;;
 					'/') enter_search_mode;;
+					'%') enter_search_date_mode;;
+					'$') enter_search_size_mode;;
 					' ') mark_file;;
 					'c') edit_marked copy "$CURRENT_DIR";;
 					'm') edit_marked move "$CURRENT_DIR";;

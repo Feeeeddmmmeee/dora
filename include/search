@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 SEARCH_QUERY=
+DATE_QUERY=
+SIZE_QUERY=
 ORIGINAL_FILES=
 
 enter_search_mode()
@@ -14,6 +16,28 @@ enter_search_mode()
 	render_input
 }
 
+enter_search_date_mode()
+{
+	log_debug "Entering SEARCH DATE mode"
+	MODE="search-date"
+	CURRENT_INPUT="$DATE_QUERY"
+	if [ -z "$DATE_QUERY" ]; then
+		sync_search_files
+	fi
+	render_input
+}
+
+enter_search_size_mode()
+{
+	log_debug "Entering SEARCH SIZE mode"
+	MODE="search-size"
+	CURRENT_INPUT="$SIZE_QUERY"
+	if [ -z "$SIZE_QUERY" ]; then
+		sync_search_files
+	fi
+	render_input
+}
+
 sync_search_files()
 {
 	ORIGINAL_FILES=("${CURRENT_DIR_CONTENT[@]}")
@@ -21,8 +45,50 @@ sync_search_files()
 
 update_search()
 {
+	CURRENT_DIR_CONTENT_NAME=()
+	CURRENT_DIR_CONTENT_SIZE=()
 	CURRENT_DIR_CONTENT=()
-	mapfile -t CURRENT_DIR_CONTENT < <(printf "%s\n" "${ORIGINAL_FILES[@]}" | grep -P "$SEARCH_QUERY" 2> /dev/null)
+	mapfile -t CURRENT_DIR_CONTENT_NAME < <(printf "%s\n" "${ORIGINAL_FILES[@]}" | grep -P "$SEARCH_QUERY" 2> /dev/null)
+	local filename
+	local size_query="${SIZE_QUERY-0}"
+	if [[ $size_query =~ ^-?[0-9]+$ ]]; then
+		for filename in "${CURRENT_DIR_CONTENT_NAME[@]}"; do
+			local filepath="$CURRENT_DIR/$filename"
+			local filesize="$(stat -c%s $filepath)"
+			if [[ "$filesize" -ge "$size_query" ]]; then
+				CURRENT_DIR_CONTENT_SIZE+=($filename)
+			fi
+		done
+	else
+		for filename in "${CURRENT_DIR_CONTENT_NAME[@]}"; do
+			CURRENT_DIR_CONTENT_SIZE+=($filename)
+		done
+	fi
+
+	if [[ "$DATE_QUERY" =~ [^[:space:]] ]]; then
+		if date -d "$DATE_QUERY" +%s >/dev/null 2>&1 ; then
+			local date_query="$(date -d "$DATE_QUERY" +%s 2>/dev/null)"
+			log_debug "Here $date_query"
+			for filename in "${CURRENT_DIR_CONTENT_SIZE[@]}"; do
+				local filepath="$CURRENT_DIR/$filename"
+				local filemoddate="$(date -r $filepath +%s)"
+				if [[ "$filemoddate" -ge "$date_query" ]]; then
+					CURRENT_DIR_CONTENT+=($filename)
+				fi
+			done
+		else
+			for filename in "${CURRENT_DIR_CONTENT_SIZE[@]}"; do
+				CURRENT_DIR_CONTENT+=($filename)
+			done
+		fi
+	else
+		for filename in "${CURRENT_DIR_CONTENT_SIZE[@]}"; do
+			CURRENT_DIR_CONTENT+=($filename)
+		done
+	fi
+
+	log_debug "$DATE_QUERY,$SIZE_QUERY,$SEARCH_QUERY"
+	log_debug "${ORIGINAL_FILES[@]} --- ${CURRENT_DIR_CONTENT_NAME[@]} --- ${CURRENT_DIR_CONTENT_SIZE[@]} --- ${CURRENT_DIR_CONTENT[@]}"
 
 	search_change
 }
