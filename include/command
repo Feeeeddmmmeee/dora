@@ -260,6 +260,37 @@ get_dir_size()
 	set_input_message "$dir_size"
 }
 
+get_dir_count()
+{
+	local dir_count
+	set_input_message "Fetching directory file count..."
+	reset_mode
+	log_debug "Fetching $PWD directory file count"
+	if [[ "$SHOW_HIDDEN" == "1" ]]; then
+		dir_count="$(ls -l | wc -l)"
+	else
+		dir_count="$(ls -lA | wc -l)"
+	fi
+	set_input_message "$dir_count files"
+}
+
+get_dir_maxsize()
+{
+	local maxsize
+	set_input_message "Fetching directory file data..."
+	reset_mode
+	log_debug "Fetching $PWD directory file data"
+	maxsize="$(find . -maxdepth 1 -type f -printf '%s %p\n' \
+		| sort -nr \
+		| head -1 \
+		| awk '{ size=$1; file=$2;
+	split("B KB MB GB TB PB",u);
+	for(i=1; size>=1024 && i<6; i++) size/=1024;
+	printf "%.1f%s %s\n", size, u[i], file }'
+	)"
+	set_input_message "$maxsize"
+}
+
 export_files() {
 	export_files_to_csv
 	directory_change
@@ -286,6 +317,8 @@ execute_command()
 		hidden) command_hidden "${tokens[1]}";;
 		q|quit) log_debug "Exiting dora..." exit 0;;
 		ds|dirsize) get_dir_size "$CURRENT_DIR";;
+		dc|dirsize) get_dir_count "$CURRENT_DIR";;
+		ms|maxsize) get_dir_maxsize "$CURRENT_DIR";;
 		lw|linewrap) command_line_wrap "${tokens[1]}";;
 		ef|export-files) export_files;;
 		ec|export-content) export_content;;

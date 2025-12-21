@@ -68,7 +68,6 @@ update_search()
 	if [[ "$DATE_QUERY" =~ [^[:space:]] ]]; then
 		if date -d "$DATE_QUERY" +%s >/dev/null 2>&1 ; then
 			local date_query="$(date -d "$DATE_QUERY" +%s 2>/dev/null)"
-			log_debug "Here $date_query"
 			for filename in "${CURRENT_DIR_CONTENT_SIZE[@]}"; do
 				local filepath="$CURRENT_DIR/$filename"
 				local filemoddate="$(date -r $filepath +%s)"
@@ -86,9 +85,6 @@ update_search()
 			CURRENT_DIR_CONTENT+=($filename)
 		done
 	fi
-
-	log_debug "$DATE_QUERY,$SIZE_QUERY,$SEARCH_QUERY"
-	log_debug "${ORIGINAL_FILES[@]} --- ${CURRENT_DIR_CONTENT_NAME[@]} --- ${CURRENT_DIR_CONTENT_SIZE[@]} --- ${CURRENT_DIR_CONTENT[@]}"
 
 	search_change
 }

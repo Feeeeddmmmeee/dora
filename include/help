@@ -33,7 +33,10 @@ Commands:
 		:linewrap [true|false]     Set the whether file preview should wrap lines, empty to toggle
 		:quit                      Exit the program
 		:export-files              Exports the currently visible file list to a csv file located in "$EXPORT_DIR"
-		:export-grep               Exports the currently selected file's visible content to a plain text file located in "$EXPORT_DIR"
+		:export-content            Exports the currently selected file's visible content to a plain text file located in "$EXPORT_DIR"
+		:dirsize                   Get current directory size
+		:dircount                  Get current directory file count
+		:maxsize                   Get the largest file's size and name
 
 Keybinds:
 	Navigation:
