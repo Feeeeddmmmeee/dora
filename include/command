@@ -260,6 +260,16 @@ get_dir_size()
 	set_input_message "$dir_size"
 }
 
+export_files() {
+	export_files_to_csv
+	directory_change
+}
+
+export_content() {
+	export_content_to_txt
+	directory_change
+}
+
 execute_command()
 {
 	local tokens=()
@@ -277,6 +287,8 @@ execute_command()
 		q|quit) log_debug "Exiting dora..." exit 0;;
 		ds|dirsize) get_dir_size "$CURRENT_DIR";;
 		lw|linewrap) command_line_wrap "${tokens[1]}";;
+		ef|export-files) export_files;;
+		ec|export-content) export_content;;
 		*) set_input_message "$(escape red_color)Command ${tokens[0]} not found$(escape default_color)";;
 	esac
 	COMMAND_HISTORY+=("$CURRENT_COMMAND")
