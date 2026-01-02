@@ -92,9 +92,9 @@ render_bottom()
 	if (( ${#CURRENT_DIR_CONTENT[@]} )); then
 		selected=${CURRENT_DIR_CONTENT[SELECTED]}
 
-		file_info="$(stat -c "%A %G " "$selected")"
-		file_info="$file_info$(format_bytes "$(stat -c "%s" "$selected")") "
-		file_info="$file_info$(date -d "$(stat -c "%z" "$selected")" +'%Y-%m-%d %H:%M') $(escape reset)"
+		file_info="$(stat -c "%A %G " "$selected" 2>/dev/null)"
+		file_info="$file_info$(format_bytes "$(stat -c "%s" "$selected" 2>/dev/null)") "
+		file_info="$file_info$(date -d "$(stat -c "%z" "$selected" 2>/dev/null)" +'%Y-%m-%d %H:%M') $(escape reset)"
 		index="($((SELECTED + 1))/${#CURRENT_DIR_CONTENT[@]})"
 	else
 			file_info="$(escape reset)"

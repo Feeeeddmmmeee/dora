@@ -182,6 +182,10 @@ edit_marked()
 			log_debug "Deleted $MARKED_DIR$MARKED"
 			set_input_message "Deleted $MARKED"
 			MARKED=""
+			SELECTED=$((SELECTED - 1))
+			if [[ $SELECTED -lt 0 ]]; then
+				SELECTED=0
+			fi
 
 			directory_change
 			;;
